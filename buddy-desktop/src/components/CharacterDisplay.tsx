@@ -1,5 +1,5 @@
 import type { AnimationState, BuddyState, ConnectionState } from "../types/state";
-import { buddyVisualModel } from "../utils/stateHelpers.mjs";
+import { buddySpriteFrames, buddyVisualModel } from "../utils/stateHelpers.mjs";
 
 export interface CharacterDisplayProps {
   buddy: BuddyState;
@@ -14,7 +14,7 @@ export function CharacterDisplay({
 }: CharacterDisplayProps) {
   const isOffline = connection === "offline";
   const visual = buddyVisualModel(buddy, connection, animationState);
-  const sprite = buddy.asciiArt.filter((line) => line.trim().length > 0).slice(0, 8);
+  const spriteFrames = buddySpriteFrames(buddy.asciiArt);
 
   return (
     <section style={styles.root} aria-label="Character display">
@@ -28,10 +28,18 @@ export function CharacterDisplay({
         data-animation-state={animationState}
       >
         <div style={{ ...styles.orbit, borderColor: visual.accent }} aria-hidden="true" />
-        {sprite.length > 0 ? (
-          <pre style={{ ...styles.sprite, color: visual.accent }} aria-hidden="true">
-            {sprite.join("\n")}
-          </pre>
+        {spriteFrames.length > 0 ? (
+          <div className="buddy-sprite" style={{ ...styles.sprite, color: visual.accent }}>
+            {spriteFrames.map((frame, index) => (
+              <pre
+                key={index}
+                className="buddy-sprite-frame"
+                aria-hidden={index === 0 ? undefined : "true"}
+              >
+                {frame.join("\n")}
+              </pre>
+            ))}
+          </div>
         ) : (
           <div style={styles.body} aria-hidden="true">
             <div style={{ ...styles.head, borderColor: visual.accent }}>
@@ -49,8 +57,8 @@ export function CharacterDisplay({
         <span style={{ ...styles.traitPill, borderColor: visual.accent, color: visual.accent }}>
           {visual.topStat.label}
         </span>
-        <span style={styles.traitText} title={buddy.personality}>
-          {buddy.personality || `${buddy.rarity} ${buddy.species}`}
+        <span style={styles.traitText} title={`${buddy.rarity} ${buddy.species}`}>
+          {buddy.rarity} {buddy.species}
         </span>
       </div>
 
@@ -92,14 +100,18 @@ const styles = {
     width: 128,
   },
   sprite: {
+    display: "grid",
     fontFamily:
       'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace',
     fontSize: 16,
     fontWeight: 800,
+    minHeight: 68,
+    minWidth: 116,
     lineHeight: 1.05,
     margin: 0,
     maxWidth: "100%",
     overflow: "hidden",
+    placeItems: "center",
     position: "relative" as const,
     textAlign: "center" as const,
     textShadow: "0 0 16px currentColor",

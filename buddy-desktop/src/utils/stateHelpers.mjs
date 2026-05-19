@@ -46,6 +46,16 @@ export function buddyVisualModel(buddy = {}, connection = "offline", animationSt
   };
 }
 
+export function buddySpriteFrames(asciiArt = []) {
+  const sprite = asciiArt.filter((line) => String(line).trim().length > 0).slice(0, 8);
+
+  if (sprite.length === 0) {
+    return [];
+  }
+
+  return [sprite, sprite, sprite];
+}
+
 export function compactText(value, fallback = "Unknown") {
   const text = String(value ?? "").trim();
   return text.length > 0 ? text : fallback;

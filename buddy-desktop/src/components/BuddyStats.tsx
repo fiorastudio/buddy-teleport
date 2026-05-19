@@ -72,9 +72,12 @@ export function BuddyStats({ buddy }: BuddyStatsProps) {
       </div>
 
       {buddy.lastReaction ? (
-        <p style={styles.reaction} title={buddy.lastReaction}>
-          {buddy.lastReaction}
-        </p>
+        <div style={styles.reaction} aria-label="Latest Buddy reaction">
+          <span style={styles.reactionLabel}>Latest reaction</span>
+          <p style={styles.reactionText} title={buddy.lastReaction}>
+            {buddy.lastReaction}
+          </p>
+        </div>
       ) : null}
     </section>
   );
@@ -177,12 +180,26 @@ const styles = {
     textAlign: "right" as const,
   },
   reaction: {
-    color: "#e2e8f0",
-    fontSize: 12,
+    background: "#f8fafc",
+    borderRadius: 8,
+    color: "#111827",
+    display: "grid",
+    gap: 5,
     lineHeight: 1.35,
     margin: 0,
-    maxHeight: 48,
-    overflow: "hidden",
+    overflowWrap: "anywhere" as const,
+    padding: "9px 10px",
+  },
+  reactionLabel: {
+    color: "#475569",
+    fontSize: 10,
+    fontWeight: 800,
+    letterSpacing: 0,
+    textTransform: "uppercase" as const,
+  },
+  reactionText: {
+    fontSize: 12,
+    margin: 0,
     overflowWrap: "anywhere" as const,
   },
 };

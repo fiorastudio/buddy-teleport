@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 
 import {
   buddyVisualModel,
+  buddySpriteFrames,
   clampNumber,
   compactText,
   dominantStat,
@@ -41,6 +42,16 @@ test("dominantStat and buddyVisualModel derive visual treatment without ascii ar
   assert.equal(visual.topStat.key, "chaos");
   assert.equal(visual.expression, "heart");
   assert.match(visual.accent, /^#/);
+});
+
+test("buddySpriteFrames keeps parsed body lines intact for CSS animation", () => {
+  const source = ["", "  .---.  ", " (@>@)", "/(   )\\", " `- -'", ""];
+
+  assert.deepEqual(buddySpriteFrames(source), [
+    ["  .---.  ", " (@>@)", "/(   )\\", " `- -'"],
+    ["  .---.  ", " (@>@)", "/(   )\\", " `- -'"],
+    ["  .---.  ", " (@>@)", "/(   )\\", " `- -'"],
+  ]);
 });
 
 test("text and offline helpers handle missing state", () => {
