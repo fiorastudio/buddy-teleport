@@ -24,6 +24,7 @@
 - Popup Buddy actions now expose `buddy_pet` and `buddy_observe` through the same safe Tauri command allowlist, then refresh the cached terminal Buddy state. Desktop-originated `buddy_observe` calls preserve caller-provided `cwd` and otherwise default to `BUDDY_WORKSPACE_CWD`/process cwd; the teleport-out script exports `BUDDY_WORKSPACE_CWD` as the terminal workspace root.
 - Permission approve/deny no longer routes through `buddy_tool`; the frontend builds a Claude BLE `permission` frame and sends it to the `ble_respond_permission` Tauri command boundary.
 - The desktop visual surface intentionally does not render Buddy's terminal ASCII status card. The parser extracts identity, XP, stats, personality, and sprite-only lines; React should animate the sprite in the avatar area, while stats/card chrome render through dedicated visual sections.
+- The React app starts from the offline default state until Tauri returns the terminal Buddy state; it no longer shows the mock Buddy fixture during startup.
 - User review found the current live popup actions too hard to discover and the reaction/speech bubble treatment too clipped. A later review accepted the prototype direction for an initial pass and requested three revisions: label the first action **Pet**, not **Pat**; remove the long Buddy personality description from the teleported Tauri surface; and make the ASCII sprite animation visible. The React popup now follows that revised direction.
 
 ## Next Concrete Steps
@@ -42,6 +43,7 @@
 - BD-003 to BD-005: TypeScript Buddy bridge package exists with MCP JSON-RPC client, process launcher, normalized state mapper, sidecar protocol, and tests.
 - BD-006 to BD-007: shared state contract, popup components, offline/default state, and view-model tests exist.
 - Buddy visual treatment derives from parsed state fields instead of dumping the terminal card into the desktop UI; top stat controls avatar accent/surface, sprite-only ASCII animates in the avatar frame, reactions render as wrapped speech-bubble UI, and personality stats remain visible without showing the long personality description.
+- The popup startup path no longer renders `MOCK_MASCOT_STATE`, preventing a transient wrong body before the terminal Buddy state arrives.
 - A static interaction prototype exists at `docs/review/buddy-desktop-interaction-prototype.html` for approval of persistent Buddy controls and wrapped speech-bubble reaction rendering.
 - BD-008 to BD-011: bridge sidecar launch spec, sidecar event protocol, Rust event boundary parsing, Rust Buddy MCP status parsing, safe Buddy tool forwarding, and teleport-back state handling exist.
 - BD-013 to BD-014: BLE protocol fixtures, line buffering, command parsing, permission serialization, and fake peripheral prototype exist.

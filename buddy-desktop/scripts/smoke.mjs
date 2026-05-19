@@ -1,4 +1,4 @@
-import { access, readdir } from "node:fs/promises";
+import { access, readFile, readdir } from "node:fs/promises";
 
 const root = new URL("../", import.meta.url);
 
@@ -32,6 +32,11 @@ for (const file of required) {
 const bridgeFixtures = await readdir(new URL("bridge/test/fixtures", root));
 if (!bridgeFixtures.includes("current-stat-card.txt")) {
   throw new Error("bridge stat-card fixture missing");
+}
+
+const appSource = await readFile(new URL("src/App.tsx", root), "utf8");
+if (!appSource.includes("useState<MascotState>(DEFAULT_MASCOT_STATE)")) {
+  throw new Error("App must start from the offline default state until terminal Buddy state arrives");
 }
 
 console.log("smoke prerequisites passed");

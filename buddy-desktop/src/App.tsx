@@ -6,12 +6,11 @@ import { buildPermissionDecision } from "./utils/permission.mjs";
 import {
   DEFAULT_BUDDY_STATE,
   DEFAULT_MASCOT_STATE,
-  MOCK_MASCOT_STATE,
   type MascotState,
 } from "./types/state";
 
 export function App() {
-  const [state, setState] = useState<MascotState>(MOCK_MASCOT_STATE);
+  const [state, setState] = useState<MascotState>(DEFAULT_MASCOT_STATE);
   const [permissionError, setPermissionError] = useState<string | null>(null);
 
   useEffect(() => {
