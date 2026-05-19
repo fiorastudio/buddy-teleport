@@ -24,6 +24,28 @@ export function statRows(stats) {
   }));
 }
 
+export function dominantStat(stats) {
+  return statRows(stats).reduce((winner, row) => (row.value > winner.value ? row : winner));
+}
+
+export function buddyVisualModel(buddy = {}, connection = "offline", animationState = "sleep") {
+  const stat = dominantStat(buddy.stats);
+  const palette = {
+    debugging: { accent: "#38bdf8", surface: "#0f2f45" },
+    patience: { accent: "#22c55e", surface: "#12351f" },
+    chaos: { accent: "#f97316", surface: "#43220d" },
+    wisdom: { accent: "#a78bfa", surface: "#2e245f" },
+    snark: { accent: "#facc15", surface: "#3a3008" },
+  }[stat.key] || { accent: "#38bdf8", surface: "#0f2f45" };
+
+  return {
+    accent: palette.accent,
+    surface: palette.surface,
+    expression: connection === "offline" ? "sleep" : animationState,
+    topStat: stat,
+  };
+}
+
 export function compactText(value, fallback = "Unknown") {
   const text = String(value ?? "").trim();
   return text.length > 0 ? text : fallback;

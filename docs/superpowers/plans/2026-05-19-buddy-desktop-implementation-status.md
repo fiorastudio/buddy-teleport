@@ -21,6 +21,7 @@
 - Desktop-to-terminal teleport is represented by the `buddy_teleport_back` Tauri command and popup **Return** action. It records a `buddy_observe` event, marks Buddy offline in desktop state, and disables polling until the app is restarted/teleported out again.
 - Popup Buddy actions now expose `buddy_pet` and `buddy_observe` through the same safe Tauri command allowlist, then refresh the cached terminal Buddy state.
 - Permission approve/deny no longer routes through `buddy_tool`; the frontend builds a Claude BLE `permission` frame and sends it to the `ble_respond_permission` Tauri command boundary.
+- The desktop visual surface intentionally does not render Buddy's terminal ASCII status card. The parser extracts identity, XP, stats, personality, and sprite-only lines; React may animate the sprite in the avatar area, but stats/card chrome render through dedicated visual sections.
 
 ## Next Concrete Steps
 
@@ -37,6 +38,7 @@
 - BD-002: Tauri-shaped app scaffold exists with MIT license, Vite entry files, React popup entry, and Rust shell modules.
 - BD-003 to BD-005: TypeScript Buddy bridge package exists with MCP JSON-RPC client, process launcher, normalized state mapper, sidecar protocol, and tests.
 - BD-006 to BD-007: shared state contract, popup components, offline/default state, and view-model tests exist.
+- Buddy visual treatment derives from parsed state fields instead of dumping the terminal card into the desktop UI; top stat controls avatar accent/surface, sprite-only ASCII can animate in the avatar frame, and personality appears as a compact trait line.
 - BD-008 to BD-011: bridge sidecar launch spec, sidecar event protocol, Rust event boundary parsing, Rust Buddy MCP status parsing, safe Buddy tool forwarding, and teleport-back state handling exist.
 - BD-013 to BD-014: BLE protocol fixtures, line buffering, command parsing, permission serialization, and fake peripheral prototype exist.
 - BD-016 to BD-018: provisional BLE decision, Claude session reducer states, popup prompt overlay, permission response serialization, and a native Tauri BLE permission command boundary exist.
@@ -50,11 +52,12 @@
 - `BUDDY_DB_PATH=/private/tmp/buddy-teleport-live-db/buddy2.db BUDDY_TELEPORT_LIVE_SIDECAR=/private/tmp/buddy-teleport-live-sidecar cargo test live_buddy_sidecar_uses_existing_db_and_supports_pet_observe_when_env_is_set -- --nocapture` from `buddy-desktop/src-tauri`
 - `npm run docs:check` from workspace root
 - `node scripts/smoke-installed-buddy.mjs` from `buddy-desktop`
+- `npm run smoke:teleport-runtime` from workspace root seeds an isolated terminal Buddy DB, launches the same teleport wrapper path for a bounded native Tauri run, and fails if runtime polling cannot parse that Buddy's stat card.
 - `BUDDY_DB_PATH=/private/tmp/buddy-teleport-gui/buddy.db ./scripts/buddy-teleport-out.sh` launched the Vite dev server and native Tauri app after seeding the temp DB with `TeleportAda`; startup reached `target/debug/buddy-desktop` with no Buddy parser errors, and `curl http://127.0.0.1:1420/` returned the React entry HTML with host permissions.
 
 ## Manual Or Dependency Gates
 
-- Real Tauri dev run requires either `BUDDY_SIDECAR_PATH` pointing to an executable Buddy wrapper or a built Buddy sidecar binary under `buddy-desktop/src-tauri/binaries/`.
+- Real Tauri dev run requires either `BUDDY_SIDECAR_PATH` pointing to an executable Buddy wrapper or a built Buddy sidecar binary under `buddy-desktop/src-tauri/binaries/`; `npm run smoke:teleport-runtime` creates this wrapper for verification.
 - Screenshot-level Playwright verification is not yet available because the repo does not currently depend on Playwright.
 - A blank Buddy DB is not a valid teleport target: the runtime poller expects an existing terminal Buddy stat card. Seed a temp DB or use the real terminal Buddy DB when doing isolated runtime checks.
 - Claude Desktop BLE verification still requires manual Hardware Buddy pairing and prompt approval testing.

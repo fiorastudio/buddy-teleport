@@ -4,6 +4,7 @@
   "type": "module",
   "scripts": {
     "docs:check": "node scripts/check-doc-boundaries.mjs",
+    "smoke:teleport-runtime": "node scripts/smoke-teleport-runtime.mjs",
     "test": "npm run docs:check"
   }
 }

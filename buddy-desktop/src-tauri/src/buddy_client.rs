@@ -118,7 +118,7 @@ pub fn parse_stat_card(card: &str) -> Result<BuddyMcpState, String> {
         .ok_or("stat card did not contain Buddy stats")?;
 
     let (name, personality) = extract_identity(&inner_lines[..first_stat_index]);
-    let ascii_art: Vec<String> = card.lines().map(|l| l.to_string()).collect();
+    let ascii_art = extract_sprite_lines(&inner_lines[..first_stat_index], &name);
 
     Ok(BuddyMcpState {
         name,
@@ -180,6 +180,37 @@ fn strip_ansi(value: &str) -> String {
     Regex::new(r"\x1b\[[0-9;]*m").unwrap().replace_all(value, "").to_string()
 }
 
+fn extract_sprite_lines(lines_before_stats: &[String], name: &str) -> Vec<String> {
+    lines_before_stats
+        .iter()
+        .filter_map(|line| {
+            let trimmed = line.trim_end();
+            if trimmed.trim().is_empty()
+                || trimmed.contains('★')
+                || is_border_line(trimmed.trim())
+                || trimmed.trim() == name
+                || trimmed.trim().starts_with('"')
+                || trimmed.trim().ends_with('"')
+                || looks_like_stat_card_text(trimmed)
+            {
+                return None;
+            }
+
+            if trimmed.chars().any(|c| !c.is_alphanumeric() && !c.is_whitespace()) {
+                Some(trimmed.to_string())
+            } else {
+                None
+            }
+        })
+        .collect()
+}
+
+fn looks_like_stat_card_text(line: &str) -> bool {
+    line.contains("DISPLAY VERBATIM")
+        || line.contains("Show the full stat card")
+        || line.contains("Do not summarize")
+}
+
 fn is_border_line(line: &str) -> bool {
     line.chars().all(|c| c == '_' || c == '.' || c == '\'' || c == '`' || c == '-')
 }
@@ -223,6 +254,7 @@ mod tests {
         assert_eq!(state.stats.debugging, 14);
         assert_eq!(state.level, 1);
         assert_eq!(state.xp, 3);
+        assert!(state.ascii_art.is_empty());
     }
 
     #[test]
@@ -263,6 +295,14 @@ DISPLAY VERBATIM: Show the full stat card below in a code block. Do not summariz
         assert_eq!(state.xp_to_next, 28);
         assert_eq!(state.stats.wisdom, 88);
         assert_eq!(state.personality, "Precise and impatient, but loyal to the terminal session.");
+        assert_eq!(state.ascii_art, vec![
+            "|\\      /|",
+            "| \\____/ |",
+            "|  o  o  |",
+            "|   ^^   |",
+            "\\______/",
+        ]);
+        assert!(!state.ascii_art.iter().any(|line| line.contains("DEBUGGING") || line.contains("Lv.")));
     }
 
     #[test]

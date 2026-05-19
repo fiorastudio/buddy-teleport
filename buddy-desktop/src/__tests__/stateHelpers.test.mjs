@@ -2,8 +2,10 @@ import test from "node:test";
 import assert from "node:assert/strict";
 
 import {
+  buddyVisualModel,
   clampNumber,
   compactText,
+  dominantStat,
   isOfflineState,
   percent,
   statRows,
@@ -24,6 +26,21 @@ test("statRows returns stable clamped Buddy stats", () => {
     { key: "wisdom", label: "Wisdom", value: 0 },
     { key: "snark", label: "Snark", value: 0 },
   ]);
+});
+
+test("dominantStat and buddyVisualModel derive visual treatment without ascii art", () => {
+  const stat = dominantStat({ debugging: 20, chaos: 88, snark: 40 });
+  assert.deepEqual(stat, { key: "chaos", label: "Chaos", value: 88 });
+
+  const visual = buddyVisualModel(
+    { stats: { debugging: 20, chaos: 88, snark: 40 }, asciiArt: ["full terminal card is ignored"] },
+    "online",
+    "heart",
+  );
+
+  assert.equal(visual.topStat.key, "chaos");
+  assert.equal(visual.expression, "heart");
+  assert.match(visual.accent, /^#/);
 });
 
 test("text and offline helpers handle missing state", () => {

@@ -49,7 +49,7 @@ export function BuddyMascot() {
       minWidth: 200,
       userSelect: "none",
       color: "#fff",
-      fontFamily: "monospace"
+      fontFamily: 'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
     }}>
       {offline && (
         <div style={{ color: "#888", fontSize: 10, marginBottom: 4 }}>
