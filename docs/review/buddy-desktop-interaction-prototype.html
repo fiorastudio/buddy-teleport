@@ -122,14 +122,48 @@
       }
 
       .sprite {
+        display: grid;
+        min-height: 54px;
+        min-width: 74px;
+        place-items: center;
+      }
+
+      .sprite-frame {
+        animation: sprite-idle 1.2s steps(1, end) infinite;
         color: #d8b4fe;
         font-family: "SFMono-Regular", Consolas, monospace;
         font-size: 12px;
+        grid-area: 1 / 1;
         line-height: 1.05;
         margin: 0;
+        opacity: 0;
         text-align: left;
         text-shadow: 0 0 12px rgba(216, 180, 254, 0.45);
         white-space: pre;
+      }
+
+      .sprite-frame:nth-child(1) {
+        animation-delay: 0s;
+      }
+
+      .sprite-frame:nth-child(2) {
+        animation-delay: 0.4s;
+      }
+
+      .sprite-frame:nth-child(3) {
+        animation-delay: 0.8s;
+      }
+
+      @keyframes sprite-idle {
+        0%,
+        33.32% {
+          opacity: 1;
+        }
+
+        33.33%,
+        100% {
+          opacity: 0;
+        }
       }
 
       .meta {
@@ -162,17 +196,6 @@
         flex: 0 0 auto;
         font-size: 11px;
         padding: 4px 7px;
-      }
-
-      .personality {
-        color: #dbe4f4;
-        display: -webkit-box;
-        font-size: 12px;
-        line-height: 1.35;
-        max-height: 49px;
-        overflow: hidden;
-        -webkit-box-orient: vertical;
-        -webkit-line-clamp: 3;
       }
 
       .speech {
@@ -355,20 +378,26 @@
 
           <section class="identity" aria-label="Buddy identity">
             <div class="avatar" aria-label="Buddy body">
-              <pre class="sprite">  .---.
+              <div class="sprite" aria-label="Animated Buddy ASCII sprite">
+                <pre class="sprite-frame">  .---.
  (@>@)
 /(   )\
  `- -'</pre>
+                <pre class="sprite-frame">  .---.
+ (-<@)
+/(   )\
+ `- -'</pre>
+                <pre class="sprite-frame">  .---.
+ (@>@)
+/(   )\
+ ' - -`</pre>
+              </div>
             </div>
             <div class="meta">
               <div class="name-row">
                 <div class="name">TeleportGui</div>
                 <div class="level">Lv. 2</div>
               </div>
-              <p class="personality">
-                Methodical, ship-shape, loyal to the terminal session, and precise about small
-                steps.
-              </p>
               <div class="speech" aria-label="Buddy reaction">
                 <div class="speech-label">Latest reaction</div>
                 <p class="speech-text">
@@ -395,7 +424,7 @@
           </section>
 
           <nav class="actions" aria-label="Buddy actions">
-            <button type="button" class="primary">Pat</button>
+            <button type="button" class="primary">Pet</button>
             <button type="button">Observe</button>
             <button type="button" class="return">Return</button>
           </nav>
@@ -404,7 +433,9 @@
         <aside class="notes">
           <h2>Approval Notes</h2>
           <ul>
-            <li>Make Buddy actions persistent and visually obvious: Pat, Observe, Return.</li>
+            <li>Make Buddy actions persistent and visually obvious: Pet, Observe, Return.</li>
+            <li>Do not show the long Buddy personality description in the teleported Tauri view.</li>
+            <li>Show the Buddy body as an animated ASCII sprite, not a static frame.</li>
             <li>Render reactions as a wrapped speech bubble, not as clipped terminal ASCII.</li>
             <li>Keep the Buddy body as sprite/avatar art, while status fields render as normal UI.</li>
             <li>Show XP and personality stats in dedicated rows so they remain readable in Tauri.</li>
