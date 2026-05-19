@@ -113,7 +113,6 @@ fn emit_mascot_event(app: &AppHandle, mcp: &BuddyMcpState, anim: &AnimationState
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use crate::mascot_state::{BuddyMcpState, AnimationState, compute_animation_state};
 
     #[test]

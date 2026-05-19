@@ -6,7 +6,7 @@ Buddy Teleport is a native macOS application that brings the `fiorastudio/buddy`
 
 - **Floating Mascot**: A transparent, always-on-top window featuring your Buddy.
 - **Tray Integration**: Compact status popup accessible from the macOS menu bar.
-- **Buddy Bridge**: Real-time integration with the Buddy MCP server using a TypeScript-based sidecar.
+- **Buddy Bridge**: Real-time integration with the Buddy MCP server using a sidecar process. The repo currently contains both a tested TypeScript bridge package and a Rust MCP polling path.
 - **Animation States**: Visual feedback for Buddy's status (Idle, Busy, Celebrate, Sleep, etc.).
 - **BLE Integration (In Progress)**: Connecting with Claude Desktop via BLE to mirror session states and handle tool permissions.
 
@@ -14,8 +14,8 @@ Buddy Teleport is a native macOS application that brings the `fiorastudio/buddy`
 
 Buddy Desktop is built with **Tauri v2** and **React**.
 
-- **Rust Backend**: Manages the application lifecycle, tray icon, floating window (`NSPanel` on macOS), and the Buddy sidecar process.
-- **TypeScript Bridge**: Acts as an MCP client over stdio, polling Buddy's state and providing a normalized data feed to the frontend.
+- **Rust Backend**: Manages the application lifecycle, tray icon, floating window (`NSPanel` on macOS), and the current Buddy sidecar polling path.
+- **TypeScript Bridge**: Provides a tested MCP client and normalized state mapper that can be used to keep Buddy compatibility close to upstream JavaScript.
 - **React Frontend**: Renders the status popup and the animated mascot.
 
 ## Project Structure
@@ -63,7 +63,7 @@ pnpm tauri dev
 
 To bundle the Buddy MCP server into a sidecar binary:
 ```bash
-./scripts/build-buddy-sidecar.sh
+BUDDY_DIR=/Users/Sandbox_Jwu/.buddy/server ./scripts/build-buddy-sidecar.sh
 ```
 
 ## Implementation Status

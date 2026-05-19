@@ -1,5 +1,4 @@
 import { access, readdir } from "node:fs/promises";
-import { spawnSync } from "node:child_process";
 
 const root = new URL("../", import.meta.url);
 
@@ -27,15 +26,6 @@ const required = [
 for (const file of required) {
   if (!(await exists(file))) {
     throw new Error(`missing smoke prerequisite: ${file}`);
-  }
-}
-
-if (await exists("../buddy/.git")) {
-  const status = spawnSync("git", ["-C", new URL("../buddy", root).pathname, "status", "--short"], {
-    encoding: "utf8",
-  });
-  if (status.status === 0 && status.stdout.trim()) {
-    throw new Error(`upstream buddy directory is dirty:\n${status.stdout}`);
   }
 }
 

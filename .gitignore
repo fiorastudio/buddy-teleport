@@ -2,6 +2,7 @@ buddy/
 openhuman/
 openhuman-reference/
 buddy-desktop/node_modules/
+buddy-desktop/dist/
 buddy-desktop/src-tauri/target/
 buddy-desktop/src-tauri/binaries/
 node_modules/

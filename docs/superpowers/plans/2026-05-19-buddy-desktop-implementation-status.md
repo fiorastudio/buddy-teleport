@@ -12,14 +12,15 @@
 - Local Buddy upstream source/install: `/Users/Sandbox_Jwu/.buddy/server`
 - BLE reference repo: `claude-desktop-buddy`
 - Do not clone Buddy again unless explicitly asked; use the local installed Buddy source and the installed MCP entry at `/Users/Sandbox_Jwu/.buddy/server/dist/server/index.js`.
-- Do not retry `npm install` in a loop. The sandboxed attempt hung for several minutes and left no `node_modules` or `package-lock.json` in `buddy-desktop`.
-- Continue with offline tests unless the user approves a networked dependency install.
+- `buddy-desktop/node_modules` and `buddy-desktop/pnpm-lock.yaml` now exist from follow-up work, so frontend build checks are available.
+- A later implementation pass added a Rust MCP polling path in `src-tauri/src/buddy_client.rs` and `src-tauri/src/buddy_poll.rs`. This differs from the earlier TypeScript-only bridge preference; decide whether to keep this Plan A Rust sidecar path or migrate runtime polling back through `buddy-desktop/bridge`.
+- The ignored local `buddy/` reference checkout has a dirty `package-lock.json` from a prior install/build attempt. Do not commit it; root `.gitignore` excludes `buddy/`.
 
 ## Next Concrete Steps
 
-1. Install frontend/Tauri dependencies in `buddy-desktop` when network access is available.
-2. Run `npm run build` in `buddy-desktop`.
-3. Run `npm run dev` or `npm run tauri:dev` in `buddy-desktop`.
+1. Decide architecture direction: keep Rust MCP polling sidecar or restore the runtime TypeScript bridge boundary.
+2. Build the Buddy sidecar binary with `scripts/build-buddy-sidecar.sh`, preferably with `BUDDY_DIR=/Users/Sandbox_Jwu/.buddy/server` to avoid touching the ignored `buddy/` checkout.
+3. Run `npm run tauri:dev` in `buddy-desktop`.
 4. Use browser/Playwright to visually verify the popup and permission prompt.
 5. Manually verify macOS tray/menu-bar behavior.
 6. Manually pair Claude Desktop Hardware Buddy and verify BLE heartbeat, status ack, and permission response.
@@ -38,19 +39,20 @@
 ## Verified Commands
 
 - `npm test` from `buddy-desktop`
+- `npm run build` from `buddy-desktop`
 - `cargo test` from `buddy-desktop/src-tauri`
 - `npm run docs:check` from workspace root
 - `node scripts/smoke-installed-buddy.mjs` from `buddy-desktop`
 
 ## Manual Or Dependency Gates
 
-- Real Tauri dev run requires installing frontend/Tauri packages. The sandboxed `npm install` attempt hung without writing `node_modules` or `package-lock.json`.
+- Real Tauri dev run requires a built Buddy sidecar binary under `buddy-desktop/src-tauri/binaries/`.
 - Playwright or browser visual verification requires the Vite/Tauri dev server to run after dependencies install.
 - Claude Desktop BLE verification still requires manual Hardware Buddy pairing and prompt approval testing.
 - Native macOS tray/menu-bar behavior still requires `tauri dev` or a built app.
 
 ## Upstream Boundaries
 
-- Buddy remains upstream source of truth and is accessed through the TypeScript bridge.
+- Buddy remains upstream source of truth. The current app has both a tested TypeScript bridge package and a Rust MCP polling path; this should be reconciled before release.
 - OpenHuman remains inspiration only; no OpenHuman source or assets are copied.
 - `claude-desktop-buddy` is used as the BLE protocol reference.
