@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { listen } from "@tauri-apps/api/event";
 import { invoke } from "@tauri-apps/api/core";
 import { StatusPopup } from "./components/StatusPopup";
+import { buildPermissionDecision } from "./utils/permission.mjs";
 import {
   DEFAULT_BUDDY_STATE,
   DEFAULT_MASCOT_STATE,
@@ -124,12 +125,10 @@ export function App() {
 
   async function handlePermissionDecision(decision: "once" | "deny") {
     try {
-      await invoke("buddy_tool", {
-        name: "permission",
-        args: {
-          id: state.claudeSession?.pendingPrompt?.id,
-          decision,
-        },
+      const frame = buildPermissionDecision(state.claudeSession?.pendingPrompt, decision);
+      await invoke("ble_respond_permission", {
+        id: frame.id,
+        decision: frame.decision,
       });
       setPermissionError(null);
     } catch (error) {

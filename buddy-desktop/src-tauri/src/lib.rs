@@ -1,4 +1,5 @@
 pub mod bridge_process;
+pub mod ble;
 pub mod buddy_client;
 pub mod buddy_poll;
 pub mod buddy_sidecar;
@@ -75,6 +76,7 @@ pub fn run() {
             commands::buddy_tool,
             commands::buddy_get_state,
             commands::buddy_teleport_back,
+            ble::ble_respond_permission,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

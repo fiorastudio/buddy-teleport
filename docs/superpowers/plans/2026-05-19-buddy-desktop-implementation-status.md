@@ -20,6 +20,7 @@
 - Terminal-to-desktop teleport is represented by `.claude/commands/buddy-teleport.md` and `scripts/buddy-teleport-out.sh`.
 - Desktop-to-terminal teleport is represented by the `buddy_teleport_back` Tauri command and popup **Return** action. It records a `buddy_observe` event, marks Buddy offline in desktop state, and disables polling until the app is restarted/teleported out again.
 - Popup Buddy actions now expose `buddy_pet` and `buddy_observe` through the same safe Tauri command allowlist, then refresh the cached terminal Buddy state.
+- Permission approve/deny no longer routes through `buddy_tool`; the frontend builds a Claude BLE `permission` frame and sends it to the `ble_respond_permission` Tauri command boundary.
 
 ## Next Concrete Steps
 
@@ -38,7 +39,7 @@
 - BD-006 to BD-007: shared state contract, popup components, offline/default state, and view-model tests exist.
 - BD-008 to BD-011: bridge sidecar launch spec, sidecar event protocol, Rust event boundary parsing, Rust Buddy MCP status parsing, safe Buddy tool forwarding, and teleport-back state handling exist.
 - BD-013 to BD-014: BLE protocol fixtures, line buffering, command parsing, permission serialization, and fake peripheral prototype exist.
-- BD-016 to BD-018: provisional BLE decision, Claude session reducer states, popup prompt overlay, and permission response serialization exist.
+- BD-016 to BD-018: provisional BLE decision, Claude session reducer states, popup prompt overlay, permission response serialization, and a native Tauri BLE permission command boundary exist.
 - BD-019 to BD-020: opt-in floating mascot state machine and local character pack validation exist.
 
 ## Verified Commands
