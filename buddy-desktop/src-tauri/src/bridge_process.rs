@@ -73,7 +73,9 @@ pub fn parse_bridge_event_line(line: &str) -> BridgeEvent {
     }
 
     if has_json_type(trimmed, "bridge_offline") {
-        return BridgeEvent::BridgeOffline(extract_json_string_field(trimmed, "message").unwrap_or_default());
+        return BridgeEvent::BridgeOffline(
+            extract_json_string_field(trimmed, "message").unwrap_or_default(),
+        );
     }
 
     BridgeEvent::Unknown
@@ -128,7 +130,10 @@ mod tests {
 
     #[test]
     fn builds_bridge_sidecar_launch_spec() {
-        let config = default_bridge_launch_config("/app/buddy-desktop/", "/Users/me/.buddy/server/dist/server/index.js");
+        let config = default_bridge_launch_config(
+            "/app/buddy-desktop/",
+            "/Users/me/.buddy/server/dist/server/index.js",
+        );
         let spec = bridge_command_spec(config);
 
         assert_eq!(spec.command, "node");
@@ -146,7 +151,10 @@ mod tests {
     fn parses_buddy_state_sidecar_line_without_parsing_buddy_payload() {
         let line = r#"{"type":"buddy_state","buddy":{"name":"Drift","level":3}}"#;
 
-        assert_eq!(parse_bridge_event_line(line), BridgeEvent::BuddyState(line.to_string()));
+        assert_eq!(
+            parse_bridge_event_line(line),
+            BridgeEvent::BuddyState(line.to_string())
+        );
     }
 
     #[test]
@@ -160,6 +168,9 @@ mod tests {
     #[test]
     fn ignores_unrecognized_bridge_lines() {
         assert_eq!(parse_bridge_event_line("not json"), BridgeEvent::Unknown);
-        assert_eq!(parse_bridge_event_line(r#"{"type":"tool_result"}"#), BridgeEvent::Unknown);
+        assert_eq!(
+            parse_bridge_event_line(r#"{"type":"tool_result"}"#),
+            BridgeEvent::Unknown
+        );
     }
 }

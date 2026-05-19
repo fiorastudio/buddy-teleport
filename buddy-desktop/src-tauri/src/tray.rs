@@ -1,6 +1,6 @@
-use tauri::{AppHandle, Manager};
 use tauri::menu::{Menu, MenuItem};
 use tauri::tray::TrayIconBuilder;
+use tauri::{AppHandle, Manager};
 
 pub fn setup_tray(app: &AppHandle) -> Result<(), tauri::Error> {
     let quit_i = MenuItem::with_id(app, "quit", "Quit", true, None::<&str>)?;

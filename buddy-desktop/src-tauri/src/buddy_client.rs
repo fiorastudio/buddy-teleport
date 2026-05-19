@@ -10,7 +10,10 @@ pub struct BuddyClient {
 
 impl BuddyClient {
     pub fn new(sidecar: BuddySidecar) -> Self {
-        Self { sidecar, next_id: 1 }
+        Self {
+            sidecar,
+            next_id: 1,
+        }
     }
 
     fn next_id(&mut self) -> u64 {
@@ -41,7 +44,10 @@ impl BuddyClient {
         let mut line = serde_json::to_string(&notif).unwrap();
         line.push('\n');
         use std::io::Write;
-        self.sidecar.stdin.write_all(line.as_bytes()).map_err(|e| e.to_string())?;
+        self.sidecar
+            .stdin
+            .write_all(line.as_bytes())
+            .map_err(|e| e.to_string())?;
         self.sidecar.stdin.flush().map_err(|e| e.to_string())?;
         Ok(())
     }
@@ -96,20 +102,23 @@ pub fn parse_stat_card(card: &str) -> Result<BuddyMcpState, String> {
         let val: u32 = cap[2].parse().unwrap_or(0);
         match &cap[1] {
             "DEBUGGING" => stats.debugging = val,
-            "PATIENCE"  => stats.patience = val,
-            "CHAOS"     => stats.chaos = val,
-            "WISDOM"    => stats.wisdom = val,
-            "SNARK"     => stats.snark = val,
+            "PATIENCE" => stats.patience = val,
+            "CHAOS" => stats.chaos = val,
+            "WISDOM" => stats.wisdom = val,
+            "SNARK" => stats.snark = val,
             _ => {}
         }
     }
 
-    let (level, xp, xp_to_next) = level_re.captures(&card)
-        .map(|c| (
-            c[1].parse().unwrap_or(1),
-            c[2].parse().unwrap_or(0),
-            c[3].parse().unwrap_or(17),
-        ))
+    let (level, xp, xp_to_next) = level_re
+        .captures(&card)
+        .map(|c| {
+            (
+                c[1].parse().unwrap_or(1),
+                c[2].parse().unwrap_or(0),
+                c[3].parse().unwrap_or(17),
+            )
+        })
         .unwrap_or((1, 0, 17));
 
     let first_stat_index = inner_lines
@@ -159,11 +168,7 @@ fn extract_identity(lines_before_stats: &[String]) -> (String, String) {
     }
 
     bio_lines.reverse();
-    let personality = bio_lines
-        .join(" ")
-        .trim()
-        .trim_matches('"')
-        .to_string();
+    let personality = bio_lines.join(" ").trim().trim_matches('"').to_string();
 
     (name.unwrap_or_else(|| "buddy".to_string()), personality)
 }
@@ -177,7 +182,10 @@ fn strip_card_border(line: &str) -> String {
 }
 
 fn strip_ansi(value: &str) -> String {
-    Regex::new(r"\x1b\[[0-9;]*m").unwrap().replace_all(value, "").to_string()
+    Regex::new(r"\x1b\[[0-9;]*m")
+        .unwrap()
+        .replace_all(value, "")
+        .to_string()
 }
 
 fn extract_sprite_lines(lines_before_stats: &[String], name: &str) -> Vec<String> {
@@ -196,7 +204,10 @@ fn extract_sprite_lines(lines_before_stats: &[String], name: &str) -> Vec<String
                 return None;
             }
 
-            if trimmed.chars().any(|c| !c.is_alphanumeric() && !c.is_whitespace()) {
+            if trimmed
+                .chars()
+                .any(|c| !c.is_alphanumeric() && !c.is_whitespace())
+            {
                 Some(trimmed.to_string())
             } else {
                 None
@@ -212,7 +223,8 @@ fn looks_like_stat_card_text(line: &str) -> bool {
 }
 
 fn is_border_line(line: &str) -> bool {
-    line.chars().all(|c| c == '_' || c == '.' || c == '\'' || c == '`' || c == '-')
+    line.chars()
+        .all(|c| c == '_' || c == '.' || c == '\'' || c == '`' || c == '-')
 }
 
 fn looks_like_name(line: &str) -> bool {
@@ -294,15 +306,24 @@ DISPLAY VERBATIM: Show the full stat card below in a code block. Do not summariz
         assert_eq!(state.level, 3);
         assert_eq!(state.xp_to_next, 28);
         assert_eq!(state.stats.wisdom, 88);
-        assert_eq!(state.personality, "Precise and impatient, but loyal to the terminal session.");
-        assert_eq!(state.ascii_art, vec![
-            "|\\      /|",
-            "| \\____/ |",
-            "|  o  o  |",
-            "|   ^^   |",
-            "\\______/",
-        ]);
-        assert!(!state.ascii_art.iter().any(|line| line.contains("DEBUGGING") || line.contains("Lv.")));
+        assert_eq!(
+            state.personality,
+            "Precise and impatient, but loyal to the terminal session."
+        );
+        assert_eq!(
+            state.ascii_art,
+            vec![
+                "|\\      /|",
+                "| \\____/ |",
+                "|  o  o  |",
+                "|   ^^   |",
+                "\\______/",
+            ]
+        );
+        assert!(!state
+            .ascii_art
+            .iter()
+            .any(|line| line.contains("DEBUGGING") || line.contains("Lv.")));
     }
 
     #[test]
@@ -316,11 +337,16 @@ DISPLAY VERBATIM: Show the full stat card below in a code block. Do not summariz
         let mut client = BuddyClient::new(sidecar);
         client.initialize().unwrap();
 
-        let hatch = client.call_tool("buddy_hatch", json!({
-            "name": "TeleportAda",
-            "species": "Robot",
-            "user_id": "teleport-smoke"
-        })).unwrap();
+        let hatch = client
+            .call_tool(
+                "buddy_hatch",
+                json!({
+                    "name": "TeleportAda",
+                    "species": "Robot",
+                    "user_id": "teleport-smoke"
+                }),
+            )
+            .unwrap();
         assert!(hatch.get("error").is_none(), "{hatch}");
 
         let status = client.get_status().unwrap();
@@ -331,11 +357,16 @@ DISPLAY VERBATIM: Show the full stat card below in a code block. Do not summariz
         let pet = client.call_tool("buddy_pet", json!({})).unwrap();
         assert!(pet.get("error").is_none(), "{pet}");
 
-        let observe = client.call_tool("buddy_observe", json!({
-            "summary": "verified teleport smoke from Rust sidecar",
-            "claims": [],
-            "edges": []
-        })).unwrap();
+        let observe = client
+            .call_tool(
+                "buddy_observe",
+                json!({
+                    "summary": "verified teleport smoke from Rust sidecar",
+                    "claims": [],
+                    "edges": []
+                }),
+            )
+            .unwrap();
         assert!(observe.get("error").is_none(), "{observe}");
 
         let after_tools = client.get_status().unwrap();

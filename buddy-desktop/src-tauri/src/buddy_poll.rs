@@ -1,4 +1,6 @@
-use crate::mascot_state::{AnimationState, BuddyMcpState, compute_animation_state, frontend_buddy_payload};
+use crate::mascot_state::{
+    compute_animation_state, frontend_buddy_payload, AnimationState, BuddyMcpState,
+};
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
 use tauri::{AppHandle, Emitter};
@@ -22,11 +24,7 @@ impl Default for PollState {
 }
 
 /// Start the polling background task. Spawns a Tokio task that calls buddy_status every 2s.
-pub fn start_poll(
-    binary_path: String,
-    shared_state: Arc<Mutex<PollState>>,
-    app: AppHandle,
-) {
+pub fn start_poll(binary_path: String, shared_state: Arc<Mutex<PollState>>, app: AppHandle) {
     tauri::async_runtime::spawn(async move {
         let mut backoff_secs = 1u64;
         {
@@ -42,7 +40,9 @@ pub fn start_poll(
             }
 
             match run_buddy_session(&binary_path, &shared_state, &app).await {
-                Ok(()) => { backoff_secs = 1; }
+                Ok(()) => {
+                    backoff_secs = 1;
+                }
                 Err(e) => {
                     eprintln!("[buddy_poll] session error: {e}. Retrying in {backoff_secs}s");
                     {
@@ -64,8 +64,8 @@ async fn run_buddy_session(
     shared_state: &Arc<Mutex<PollState>>,
     app: &AppHandle,
 ) -> Result<(), String> {
-    use crate::buddy_sidecar::BuddySidecar;
     use crate::buddy_client::BuddyClient;
+    use crate::buddy_sidecar::BuddySidecar;
 
     let sidecar = BuddySidecar::spawn(binary_path)?;
     let mut client = BuddyClient::new(sidecar);
@@ -115,23 +115,34 @@ fn emit_mascot_event(app: &AppHandle, mcp: &BuddyMcpState, anim: &AnimationState
 
 #[cfg(test)]
 mod tests {
-    use crate::mascot_state::{BuddyMcpState, AnimationState, compute_animation_state};
+    use crate::mascot_state::{compute_animation_state, AnimationState, BuddyMcpState};
 
     #[test]
     fn test_animation_state_sleep_when_offline() {
-        let mcp = BuddyMcpState { online: false, ..BuddyMcpState::default() };
+        let mcp = BuddyMcpState {
+            online: false,
+            ..BuddyMcpState::default()
+        };
         assert_eq!(compute_animation_state(&mcp, 1), AnimationState::Sleep);
     }
 
     #[test]
     fn test_animation_state_idle_when_online_no_level_up() {
-        let mcp = BuddyMcpState { online: true, level: 1, ..BuddyMcpState::default() };
+        let mcp = BuddyMcpState {
+            online: true,
+            level: 1,
+            ..BuddyMcpState::default()
+        };
         assert_eq!(compute_animation_state(&mcp, 1), AnimationState::Idle);
     }
 
     #[test]
     fn test_animation_state_celebrate_on_level_up() {
-        let mcp = BuddyMcpState { online: true, level: 2, ..BuddyMcpState::default() };
+        let mcp = BuddyMcpState {
+            online: true,
+            level: 2,
+            ..BuddyMcpState::default()
+        };
         assert_eq!(compute_animation_state(&mcp, 1), AnimationState::Celebrate);
     }
 }

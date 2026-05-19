@@ -17,6 +17,7 @@
 - A later implementation pass added a Rust MCP polling path in `src-tauri/src/buddy_client.rs` and `src-tauri/src/buddy_poll.rs`. This differs from the earlier TypeScript-only bridge preference; decide whether to keep this Plan A Rust sidecar path or migrate runtime polling back through `buddy-desktop/bridge`.
 - The ignored local `buddy/` reference checkout has a dirty `package-lock.json` from a prior install/build attempt. Do not commit it; root `.gitignore` excludes `buddy/`.
 - The Rust sidecar path now supports `BUDDY_SIDECAR_PATH` for manual teleport verification with an installed Buddy wrapper.
+- Plain debug `cargo run` falls back to the installed Buddy MCP entry at `$HOME/.buddy/server/dist/server/index.js` when no packaged debug sidecar binary exists; JavaScript MCP entries are launched through `node`.
 - A live Rust smoke test can be run with `BUDDY_TELEPORT_LIVE_SIDECAR=/path/to/wrapper BUDDY_DB_PATH=/tmp/buddy.db cargo test live_buddy_sidecar_uses_existing_db_and_supports_pet_observe_when_env_is_set -- --nocapture`.
 - Terminal-to-desktop teleport is represented by `.claude/commands/buddy-teleport.md` and `scripts/buddy-teleport-out.sh`.
 - Desktop-to-terminal teleport is represented by the `buddy_teleport_back` Tauri command and popup **Return** action. It records a `buddy_observe` event, marks Buddy offline in desktop state, and disables polling until the app is restarted/teleported out again.
@@ -56,11 +57,12 @@
 - `npm run docs:check` from workspace root
 - `node scripts/smoke-installed-buddy.mjs` from `buddy-desktop`
 - `npm run smoke:teleport-runtime` from workspace root seeds an isolated terminal Buddy DB, launches the same teleport wrapper path for a bounded native Tauri run, and fails if runtime polling cannot parse that Buddy's stat card.
+- `cargo run` from `buddy-desktop/src-tauri` starts `target/debug/buddy-desktop` and spawns `node /Users/Sandbox_Jwu/.buddy/server/dist/server/index.js` without the earlier `failed to spawn buddy: No such file or directory` retry loop.
 - `BUDDY_DB_PATH=/private/tmp/buddy-teleport-gui/buddy.db ./scripts/buddy-teleport-out.sh` launched the Vite dev server and native Tauri app after seeding the temp DB with `TeleportAda`; startup reached `target/debug/buddy-desktop` with no Buddy parser errors, and `curl http://127.0.0.1:1420/` returned the React entry HTML with host permissions.
 
 ## Manual Or Dependency Gates
 
-- Real Tauri dev run requires either `BUDDY_SIDECAR_PATH` pointing to an executable Buddy wrapper or a built Buddy sidecar binary under `buddy-desktop/src-tauri/binaries/`; `npm run smoke:teleport-runtime` creates this wrapper for verification.
+- Release/native packaging still requires a built Buddy sidecar binary under `buddy-desktop/src-tauri/binaries/`; `npm run smoke:teleport-runtime` creates a wrapper for isolated teleport verification.
 - Screenshot-level Playwright verification is not yet available because the repo does not currently depend on Playwright.
 - A blank Buddy DB is not a valid teleport target: the runtime poller expects an existing terminal Buddy stat card. Seed a temp DB or use the real terminal Buddy DB when doing isolated runtime checks.
 - Claude Desktop BLE verification still requires manual Hardware Buddy pairing and prompt approval testing.
