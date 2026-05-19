@@ -31,4 +31,4 @@ echo "Teleporting terminal Buddy into desktop via $WRAPPER"
 echo "Using Buddy DB: ${BUDDY_DB_PATH:-$HOME/.buddy/buddy.db}"
 
 cd "$WORKSPACE/buddy-desktop"
-BUDDY_SIDECAR_PATH="$WRAPPER" pnpm tauri dev
+BUDDY_WORKSPACE_CWD="${BUDDY_WORKSPACE_CWD:-$WORKSPACE}" BUDDY_SIDECAR_PATH="$WRAPPER" pnpm tauri dev

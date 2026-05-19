@@ -19,7 +19,7 @@
 - A live Rust smoke test can be run with `BUDDY_TELEPORT_LIVE_SIDECAR=/path/to/wrapper BUDDY_DB_PATH=/tmp/buddy.db cargo test live_buddy_sidecar_uses_existing_db_and_supports_pet_observe_when_env_is_set -- --nocapture`.
 - Terminal-to-desktop teleport is represented by `.claude/commands/buddy-teleport.md` and `scripts/buddy-teleport-out.sh`.
 - Desktop-to-terminal teleport is represented by the `buddy_teleport_back` Tauri command and popup **Return** action. It records a `buddy_observe` event, marks Buddy offline in desktop state, and disables polling until the app is restarted/teleported out again.
-- Popup Buddy actions now expose `buddy_pet` and `buddy_observe` through the same safe Tauri command allowlist, then refresh the cached terminal Buddy state.
+- Popup Buddy actions now expose `buddy_pet` and `buddy_observe` through the same safe Tauri command allowlist, then refresh the cached terminal Buddy state. Desktop-originated `buddy_observe` calls preserve caller-provided `cwd` and otherwise default to `BUDDY_WORKSPACE_CWD`/process cwd; the teleport-out script exports `BUDDY_WORKSPACE_CWD` as the terminal workspace root.
 - Permission approve/deny no longer routes through `buddy_tool`; the frontend builds a Claude BLE `permission` frame and sends it to the `ble_respond_permission` Tauri command boundary.
 - The desktop visual surface intentionally does not render Buddy's terminal ASCII status card. The parser extracts identity, XP, stats, personality, and sprite-only lines; React may animate the sprite in the avatar area, but stats/card chrome render through dedicated visual sections.
 
@@ -49,7 +49,7 @@
 - `npm test` from `buddy-desktop`
 - `npm run build` from `buddy-desktop`
 - `cargo test` from `buddy-desktop/src-tauri`
-- `BUDDY_DB_PATH=/private/tmp/buddy-teleport-live-db/buddy2.db BUDDY_TELEPORT_LIVE_SIDECAR=/private/tmp/buddy-teleport-live-sidecar cargo test live_buddy_sidecar_uses_existing_db_and_supports_pet_observe_when_env_is_set -- --nocapture` from `buddy-desktop/src-tauri`
+- `BUDDY_DB_PATH=/private/tmp/buddy-teleport-live/buddy.db BUDDY_TELEPORT_LIVE_SIDECAR=/private/tmp/buddy-teleport-live/buddy-sidecar cargo test live_buddy_sidecar_uses_existing_db_and_supports_pet_observe_when_env_is_set -- --nocapture` from `buddy-desktop/src-tauri`
 - `npm run docs:check` from workspace root
 - `node scripts/smoke-installed-buddy.mjs` from `buddy-desktop`
 - `npm run smoke:teleport-runtime` from workspace root seeds an isolated terminal Buddy DB, launches the same teleport wrapper path for a bounded native Tauri run, and fails if runtime polling cannot parse that Buddy's stat card.
