@@ -1,23 +1,29 @@
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum PopupVisibility {
-    Hidden,
-    Visible,
-}
+use tauri::{AppHandle, Manager};
+use tauri::menu::{Menu, MenuItem};
+use tauri::tray::{TrayIconBuilder, TrayIcon};
 
-pub fn toggle_popup(current: PopupVisibility) -> PopupVisibility {
-    match current {
-        PopupVisibility::Hidden => PopupVisibility::Visible,
-        PopupVisibility::Visible => PopupVisibility::Hidden,
-    }
-}
+pub fn setup_tray(app: &AppHandle) -> Result<(), tauri::Error> {
+    let quit_i = MenuItem::with_id(app, "quit", "Quit", true, None::<&str>)?;
+    let menu = Menu::with_items(app, &[&quit_i])?;
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+    let _tray = TrayIconBuilder::new()
+        .icon(app.default_window_icon().unwrap().clone())
+        .menu(&menu)
+        .on_menu_event(move |app, event| {
+            if event.id == "quit" {
+                app.exit(0);
+            }
+        })
+        .on_tray_icon_event(|tray, event| {
+            if let tauri::tray::TrayIconEvent::Click { .. } = event {
+                let app = tray.app_handle();
+                if let Some(window) = app.get_webview_window("status-popup") {
+                    let _ = window.show();
+                    let _ = window.set_focus();
+                }
+            }
+        })
+        .build(app)?;
 
-    #[test]
-    fn popup_visibility_toggles() {
-        assert_eq!(toggle_popup(PopupVisibility::Hidden), PopupVisibility::Visible);
-        assert_eq!(toggle_popup(PopupVisibility::Visible), PopupVisibility::Hidden);
-    }
+    Ok(())
 }

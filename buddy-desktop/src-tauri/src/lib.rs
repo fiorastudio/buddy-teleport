@@ -25,12 +25,15 @@ pub fn run() {
         .plugin(tauri_plugin_shell::init())
         .manage(BuddyPollHandle(poll_state))
         .setup(|app| {
+            // Setup tray
+            tray::setup_tray(app.handle())?;
+
             // In development, find the binary in src-tauri/binaries/
             let binary_path = if cfg!(debug_assertions) {
                 app.path().resource_dir()
                     .expect("resource dir not found")
                     .join("binaries")
-                    .join("buddy-server-aarch64-apple-darwin")
+                    .join(format!("buddy-server-{}", tauri::utils::platform::target_triple().unwrap()))
                     .to_string_lossy()
                     .to_string()
             } else {
