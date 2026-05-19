@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
+import { listen } from "@tauri-apps/api/event";
+import { invoke } from "@tauri-apps/api/core";
 import { StatusPopup } from "./components/StatusPopup";
-import { buildPermissionDecision } from "./utils/permission.mjs";
 import {
   DEFAULT_MASCOT_STATE,
   MOCK_MASCOT_STATE,
@@ -12,38 +13,59 @@ export function App() {
   const [permissionError, setPermissionError] = useState<string | null>(null);
 
   useEffect(() => {
-    const onMascotState = (event: Event) => {
-      const customEvent = event as CustomEvent<MascotState>;
-      setState({
-        ...DEFAULT_MASCOT_STATE,
-        ...customEvent.detail,
+    let unlistenMascot: (() => void) | undefined;
+    let unlistenOffline: (() => void) | undefined;
+
+    async function setupListeners() {
+      unlistenMascot = await listen<any>("mascot-state-updated", (event) => {
+        setState({
+          ...DEFAULT_MASCOT_STATE,
+          ...event.payload,
+        });
+        setPermissionError(null);
       });
-      setPermissionError(null);
-    };
 
-    const onBridgeOffline = (event: Event) => {
-      const customEvent = event as CustomEvent<{ message?: string }>;
-      setState((current) => ({
-        ...current,
-        connection: "offline",
-        animationState: "sleep",
-        errorMessage: customEvent.detail?.message || "Buddy bridge is offline",
-      }));
-    };
+      unlistenOffline = await listen<any>("buddy-offline", (event) => {
+        setState((current) => ({
+          ...current,
+          connection: "offline",
+          animationState: "sleep",
+          errorMessage: (event.payload as any)?.message || "Buddy bridge is offline",
+        }));
+      });
+      
+      // Fetch initial state
+      try {
+        const initialState = await invoke<any>("buddy_get_state");
+        if (initialState) {
+          setState((current) => ({
+            ...current,
+            buddy: initialState,
+            connection: "online",
+          }));
+        }
+      } catch (e) {
+        console.error("Failed to fetch initial state", e);
+      }
+    }
 
-    window.addEventListener("mascot-state-updated", onMascotState);
-    window.addEventListener("bridge-offline", onBridgeOffline);
+    setupListeners();
 
     return () => {
-      window.removeEventListener("mascot-state-updated", onMascotState);
-      window.removeEventListener("bridge-offline", onBridgeOffline);
+      if (unlistenMascot) unlistenMascot();
+      if (unlistenOffline) unlistenOffline();
     };
   }, []);
 
-  function handlePermissionDecision(decision: "once" | "deny") {
+  async function handlePermissionDecision(decision: "once" | "deny") {
     try {
-      const payload = buildPermissionDecision(state.claudeSession?.pendingPrompt, decision);
-      window.dispatchEvent(new CustomEvent("buddy-permission-decision", { detail: payload }));
+      await invoke("buddy_tool", {
+        name: "permission",
+        args: {
+          id: state.claudeSession?.pendingPrompt?.id,
+          decision,
+        },
+      });
       setPermissionError(null);
     } catch (error) {
       setPermissionError(error instanceof Error ? error.message : String(error));
