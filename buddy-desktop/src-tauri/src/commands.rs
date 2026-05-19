@@ -1,5 +1,5 @@
 use crate::buddy_poll::PollState;
-use crate::mascot_state::BuddyMcpState;
+use crate::mascot_state::frontend_buddy_payload;
 use std::sync::{Arc, Mutex};
 use tauri::State;
 use serde_json::Value;
@@ -10,20 +10,100 @@ pub struct BuddyPollHandle(pub Arc<Mutex<PollState>>);
 #[tauri::command]
 pub fn buddy_tool(
     name: String,
-    _args: Option<Value>,
-    _state: State<BuddyPollHandle>,
+    args: Option<Value>,
+    state: State<BuddyPollHandle>,
 ) -> Result<String, String> {
-    // Interactive tool calls are stubbed in Plan A v1
-    Err(format!("buddy_tool({name}) not yet wired — use buddy_get_state for reads"))
+    let binary_path = state
+        .0
+        .lock()
+        .unwrap()
+        .binary_path
+        .clone()
+        .ok_or("Buddy sidecar path is not ready yet")?;
+
+    let (result, refreshed_state) = call_buddy_tool_once(&binary_path, &name, args.unwrap_or(Value::Object(Default::default())))?;
+    {
+        let mut poll_state = state.0.lock().unwrap();
+        poll_state.prev_level = poll_state.mcp.level;
+        poll_state.mcp = refreshed_state;
+    }
+
+    Ok(result.to_string())
 }
 
 /// Get the current cached buddy state synchronously.
 #[tauri::command]
-pub fn buddy_get_state(state: State<BuddyPollHandle>) -> BuddyMcpState {
-    state.0.lock().unwrap().mcp.clone()
+pub fn buddy_get_state(state: State<BuddyPollHandle>) -> Value {
+    frontend_buddy_payload(&state.0.lock().unwrap().mcp)
 }
 
 #[tauri::command]
 pub fn greet(name: &str) -> String {
     format!("Hello, {}! You've been greeted from Rust!", name)
+}
+
+pub fn call_buddy_tool_once(binary_path: &str, name: &str, args: Value) -> Result<(Value, crate::mascot_state::BuddyMcpState), String> {
+    if !is_supported_buddy_tool(name) {
+        return Err(format!("unsupported Buddy teleport tool: {name}"));
+    }
+
+    let sidecar = crate::buddy_sidecar::BuddySidecar::spawn(binary_path)?;
+    let mut client = crate::buddy_client::BuddyClient::new(sidecar);
+    client.initialize()?;
+    let result = client.call_tool(name, args)?;
+    let refreshed_state = client.get_status()?;
+
+    Ok((result, refreshed_state))
+}
+
+pub fn is_supported_buddy_tool(name: &str) -> bool {
+    matches!(
+        name,
+        "buddy_status"
+            | "buddy_pet"
+            | "buddy_observe"
+            | "buddy_dream"
+            | "buddy_remember"
+            | "buddy_mode"
+            | "buddy_reasoning_status"
+    )
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::mascot_state::{BuddyMcpState, BuddyStats};
+
+    #[test]
+    fn only_safe_teleport_tools_are_exposed() {
+        assert!(is_supported_buddy_tool("buddy_pet"));
+        assert!(is_supported_buddy_tool("buddy_observe"));
+        assert!(is_supported_buddy_tool("buddy_status"));
+        assert!(!is_supported_buddy_tool("buddy_hatch"));
+        assert!(!is_supported_buddy_tool("buddy_respawn"));
+        assert!(!is_supported_buddy_tool("permission"));
+    }
+
+    #[test]
+    fn cached_state_command_payload_preserves_identity_fields() {
+        let state = BuddyMcpState {
+            name: "Ada".into(),
+            species: "VOID CAT".into(),
+            rarity: "RARE".into(),
+            level: 3,
+            xp: 4,
+            xp_to_next: 28,
+            personality: "Loyal to the terminal session.".into(),
+            stats: BuddyStats { wisdom: 88, ..BuddyStats::default() },
+            online: true,
+            ..BuddyMcpState::default()
+        };
+
+        let payload = frontend_buddy_payload(&state);
+
+        assert_eq!(payload["name"], "Ada");
+        assert_eq!(payload["species"], "VOID CAT");
+        assert_eq!(payload["personality"], "Loyal to the terminal session.");
+        assert_eq!(payload["stats"]["wisdom"], 88);
+    }
 }

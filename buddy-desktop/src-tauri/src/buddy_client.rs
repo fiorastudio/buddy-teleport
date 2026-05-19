@@ -72,25 +72,27 @@ impl BuddyClient {
 
 /// Parse a buddy stat card text block into BuddyMcpState.
 pub fn parse_stat_card(card: &str) -> Result<BuddyMcpState, String> {
-    // Rarity + species: "| ★ COMMON                         PENGUIN |"
-    let rarity_re = Regex::new(r"★\s+(\w+)").unwrap();
-    let species_re = Regex::new(r"★\s+\w+\s+(\w+)").unwrap();
-    // Name line: "| buddy                                    |"
+    let card = strip_ansi(card);
+    let header_re = Regex::new(r"★+\s+([A-Z][A-Z0-9_-]*)\s+(.+?)\s*$").unwrap();
     let stat_re = Regex::new(r"(DEBUGGING|PATIENCE|CHAOS|WISDOM|SNARK)\s+[█▓░]+\s+(\d+)").unwrap();
     let level_re = Regex::new(r"Lv\.(\d+)\s*·\s*(\d+)/(\d+)").unwrap();
 
-    let rarity = rarity_re.captures(card)
-        .and_then(|c| c.get(1))
-        .map(|m| m.as_str().to_string())
-        .unwrap_or_default();
+    let inner_lines: Vec<String> = card.lines().map(strip_card_border).collect();
 
-    let species = species_re.captures(card)
-        .and_then(|c| c.get(1))
-        .map(|m| m.as_str().to_string())
+    let (rarity, species) = inner_lines
+        .iter()
+        .find_map(|line| {
+            header_re.captures(line).map(|captures| {
+                (
+                    captures[1].trim().to_string(),
+                    captures[2].trim().to_string(),
+                )
+            })
+        })
         .unwrap_or_default();
 
     let mut stats = crate::mascot_state::BuddyStats::default();
-    for cap in stat_re.captures_iter(card) {
+    for cap in stat_re.captures_iter(&card) {
         let val: u32 = cap[2].parse().unwrap_or(0);
         match &cap[1] {
             "DEBUGGING" => stats.debugging = val,
@@ -102,7 +104,7 @@ pub fn parse_stat_card(card: &str) -> Result<BuddyMcpState, String> {
         }
     }
 
-    let (level, xp, xp_to_next) = level_re.captures(card)
+    let (level, xp, xp_to_next) = level_re.captures(&card)
         .map(|c| (
             c[1].parse().unwrap_or(1),
             c[2].parse().unwrap_or(0),
@@ -110,20 +112,12 @@ pub fn parse_stat_card(card: &str) -> Result<BuddyMcpState, String> {
         ))
         .unwrap_or((1, 0, 17));
 
-    let name = card.lines()
-        .map(|l| l.trim_matches(|c| c == '|' || c == ' '))
-        .filter(|l| !l.is_empty()
-            && !l.contains('★')
-            && !l.contains("DEBUGGING") && !l.contains("PATIENCE")
-            && !l.contains("CHAOS") && !l.contains("WISDOM") && !l.contains("SNARK")
-            && !l.contains("Lv.")
-            && !l.starts_with('.') && !l.starts_with('\'')
-            && l.chars().all(|c| c.is_alphanumeric() || c == ' ' || c == '-' || c == '_'))
-        .next()
-        .unwrap_or("buddy")
-        .trim()
-        .to_string();
+    let first_stat_index = inner_lines
+        .iter()
+        .position(|line| stat_re.is_match(line))
+        .ok_or("stat card did not contain Buddy stats")?;
 
+    let (name, personality) = extract_identity(&inner_lines[..first_stat_index]);
     let ascii_art: Vec<String> = card.lines().map(|l| l.to_string()).collect();
 
     Ok(BuddyMcpState {
@@ -135,10 +129,69 @@ pub fn parse_stat_card(card: &str) -> Result<BuddyMcpState, String> {
         rarity,
         species,
         ascii_art,
-        personality: String::new(),
+        personality,
         last_reaction: None,
         online: true,
     })
+}
+
+fn extract_identity(lines_before_stats: &[String]) -> (String, String) {
+    let mut skip_bio = false;
+    let mut bio_lines = Vec::new();
+    let mut name = None;
+
+    for line in lines_before_stats.iter().rev() {
+        let trimmed = line.trim();
+        if trimmed.is_empty() || trimmed.contains('★') || is_border_line(trimmed) {
+            continue;
+        }
+
+        if skip_bio || trimmed.ends_with('"') || trimmed.starts_with('"') {
+            bio_lines.push(trimmed.to_string());
+            skip_bio = !trimmed.starts_with('"');
+            continue;
+        }
+
+        if looks_like_name(trimmed) {
+            name = Some(trimmed.to_string());
+            break;
+        }
+    }
+
+    bio_lines.reverse();
+    let personality = bio_lines
+        .join(" ")
+        .trim()
+        .trim_matches('"')
+        .to_string();
+
+    (name.unwrap_or_else(|| "buddy".to_string()), personality)
+}
+
+fn strip_card_border(line: &str) -> String {
+    line.trim()
+        .trim_start_matches(|c| c == '|' || c == '.' || c == '\'' || c == '`')
+        .trim_end_matches(|c| c == '|' || c == '\'' || c == '`')
+        .trim()
+        .to_string()
+}
+
+fn strip_ansi(value: &str) -> String {
+    Regex::new(r"\x1b\[[0-9;]*m").unwrap().replace_all(value, "").to_string()
+}
+
+fn is_border_line(line: &str) -> bool {
+    line.chars().all(|c| c == '_' || c == '.' || c == '\'' || c == '`' || c == '-')
+}
+
+fn looks_like_name(line: &str) -> bool {
+    !line.contains("DEBUGGING")
+        && !line.contains("PATIENCE")
+        && !line.contains("CHAOS")
+        && !line.contains("WISDOM")
+        && !line.contains("SNARK")
+        && !line.contains("Lv.")
+        && line.chars().any(|c| c.is_alphanumeric())
 }
 
 #[cfg(test)]
@@ -170,5 +223,84 @@ mod tests {
         assert_eq!(state.stats.debugging, 14);
         assert_eq!(state.level, 1);
         assert_eq!(state.xp, 3);
+    }
+
+    #[test]
+    fn test_parse_upstream_card_with_multiword_species_and_personality() {
+        let card = r#"
+DISPLAY VERBATIM: Show the full stat card below in a code block. Do not summarize.
+
+.__________________________________________.
+| ★★ RARE                         VOID CAT |
+|                                          |
+|  |\      /|                              |
+|  | \____/ |                              |
+|  |  o  o  |                              |
+|  |   ^^   |                              |
+|   \______/                               |
+|                                          |
+| Ada                                      |
+|                                          |
+| "Precise and impatient, but loyal to     |
+| the terminal session."                   |
+|                                          |
+| DEBUGGING  █████▓░░   69                 |
+| PATIENCE   ███▓░░░░   43                 |
+| CHAOS      ██▓░░░░░   31                 |
+| WISDOM     ███████░   88                 |
+| SNARK      █▓░░░░░░   19                 |
+|                                          |
+| Lv.3 · 4/28 XP to next                   |
+'__________________________________________'
+"#;
+
+        let state = parse_stat_card(&format!("\x1b[36m{card}\x1b[0m")).unwrap();
+
+        assert_eq!(state.name, "Ada");
+        assert_eq!(state.rarity, "RARE");
+        assert_eq!(state.species, "VOID CAT");
+        assert_eq!(state.level, 3);
+        assert_eq!(state.xp_to_next, 28);
+        assert_eq!(state.stats.wisdom, 88);
+        assert_eq!(state.personality, "Precise and impatient, but loyal to the terminal session.");
+    }
+
+    #[test]
+    fn live_buddy_sidecar_uses_existing_db_and_supports_pet_observe_when_env_is_set() {
+        let Ok(sidecar_path) = std::env::var("BUDDY_TELEPORT_LIVE_SIDECAR") else {
+            eprintln!("set BUDDY_TELEPORT_LIVE_SIDECAR to run live Buddy teleport smoke");
+            return;
+        };
+
+        let sidecar = crate::buddy_sidecar::BuddySidecar::spawn(&sidecar_path).unwrap();
+        let mut client = BuddyClient::new(sidecar);
+        client.initialize().unwrap();
+
+        let hatch = client.call_tool("buddy_hatch", json!({
+            "name": "TeleportAda",
+            "species": "Robot",
+            "user_id": "teleport-smoke"
+        })).unwrap();
+        assert!(hatch.get("error").is_none(), "{hatch}");
+
+        let status = client.get_status().unwrap();
+        assert_eq!(status.name, "TeleportAda");
+        assert_eq!(status.species, "ROBOT");
+        assert!(status.online);
+
+        let pet = client.call_tool("buddy_pet", json!({})).unwrap();
+        assert!(pet.get("error").is_none(), "{pet}");
+
+        let observe = client.call_tool("buddy_observe", json!({
+            "summary": "verified teleport smoke from Rust sidecar",
+            "claims": [],
+            "edges": []
+        })).unwrap();
+        assert!(observe.get("error").is_none(), "{observe}");
+
+        let after_tools = client.get_status().unwrap();
+        assert_eq!(after_tools.name, "TeleportAda");
+        assert_eq!(after_tools.species, "ROBOT");
+        assert!(after_tools.xp >= status.xp);
     }
 }

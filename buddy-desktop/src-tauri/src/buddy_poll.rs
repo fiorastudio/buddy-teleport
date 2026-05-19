@@ -1,4 +1,4 @@
-use crate::mascot_state::{AnimationState, BuddyMcpState, compute_animation_state};
+use crate::mascot_state::{AnimationState, BuddyMcpState, compute_animation_state, frontend_buddy_payload};
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
 use tauri::{AppHandle, Emitter};
@@ -6,11 +6,12 @@ use tauri::{AppHandle, Emitter};
 pub struct PollState {
     pub mcp: BuddyMcpState,
     pub prev_level: u32,
+    pub binary_path: Option<String>,
 }
 
 impl Default for PollState {
     fn default() -> Self {
-        Self { mcp: BuddyMcpState::default(), prev_level: 1 }
+        Self { mcp: BuddyMcpState::default(), prev_level: 1, binary_path: None }
     }
 }
 
@@ -22,6 +23,10 @@ pub fn start_poll(
 ) {
     tauri::async_runtime::spawn(async move {
         let mut backoff_secs = 1u64;
+        {
+            let mut state = shared_state.lock().unwrap();
+            state.binary_path = Some(binary_path.clone());
+        }
 
         loop {
             match run_buddy_session(&binary_path, &shared_state, &app).await {
@@ -88,25 +93,10 @@ async fn run_buddy_session(
 fn emit_mascot_event(app: &AppHandle, mcp: &BuddyMcpState, anim: &AnimationState) {
     use serde_json::json;
     let payload = json!({
-        "buddy": {
-            "name": mcp.name,
-            "level": mcp.level,
-            "xp": mcp.xp,
-            "xpToNext": mcp.xp_to_next,
-            "stats": {
-                "debugging": mcp.stats.debugging,
-                "patience": mcp.stats.patience,
-                "chaos": mcp.stats.chaos,
-                "wisdom": mcp.stats.wisdom,
-                "snark": mcp.stats.snark,
-            },
-            "rarity": mcp.rarity,
-            "species": mcp.species,
-            "asciiArt": mcp.ascii_art,
-            "personality": mcp.personality,
-            "lastReaction": mcp.last_reaction,
-        },
+        "connection": "online",
+        "buddy": frontend_buddy_payload(mcp),
         "animationState": anim,
+        "errorMessage": null,
     });
     let _ = app.emit("mascot-state-updated", payload);
 }

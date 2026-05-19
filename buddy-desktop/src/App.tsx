@@ -3,6 +3,7 @@ import { listen } from "@tauri-apps/api/event";
 import { invoke } from "@tauri-apps/api/core";
 import { StatusPopup } from "./components/StatusPopup";
 import {
+  DEFAULT_BUDDY_STATE,
   DEFAULT_MASCOT_STATE,
   MOCK_MASCOT_STATE,
   type MascotState,
@@ -21,6 +22,10 @@ export function App() {
         setState({
           ...DEFAULT_MASCOT_STATE,
           ...event.payload,
+          buddy: {
+            ...DEFAULT_BUDDY_STATE,
+            ...(event.payload?.buddy || {}),
+          },
         });
         setPermissionError(null);
       });
@@ -40,7 +45,10 @@ export function App() {
         if (initialState) {
           setState((current) => ({
             ...current,
-            buddy: initialState,
+            buddy: {
+              ...DEFAULT_BUDDY_STATE,
+              ...initialState,
+            },
             connection: "online",
           }));
         }

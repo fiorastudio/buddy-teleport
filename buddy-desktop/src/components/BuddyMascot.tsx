@@ -3,7 +3,7 @@ import { listen } from "@tauri-apps/api/event";
 import type { MascotState } from "../types/state";
 import { BuddyStats } from "./BuddyStats";
 import { CharacterDisplay } from "./CharacterDisplay";
-import { DEFAULT_MASCOT_STATE } from "../types/state";
+import { DEFAULT_BUDDY_STATE, DEFAULT_MASCOT_STATE } from "../types/state";
 
 export function BuddyMascot() {
   const [state, setState] = useState<MascotState>(DEFAULT_MASCOT_STATE);
@@ -15,7 +15,14 @@ export function BuddyMascot() {
 
     async function setupListeners() {
       unlistenMascot = await listen<MascotState>("mascot-state-updated", (event) => {
-        setState(event.payload);
+        setState({
+          ...DEFAULT_MASCOT_STATE,
+          ...event.payload,
+          buddy: {
+            ...DEFAULT_BUDDY_STATE,
+            ...(event.payload?.buddy || {}),
+          },
+        });
         setOffline(false);
       });
       unlistenOffline = await listen("buddy-offline", () => {

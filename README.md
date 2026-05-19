@@ -56,8 +56,10 @@ buddy_openhuman_teleport/
 
 ```bash
 cd buddy-desktop
-pnpm tauri dev
+BUDDY_SIDECAR_PATH=/path/to/buddy-server-or-wrapper pnpm tauri dev
 ```
+
+If `BUDDY_SIDECAR_PATH` is omitted, the app uses the packaged sidecar binary from Tauri resources. The sidecar inherits the normal Buddy environment, so by default it reads the same `~/.buddy/buddy.db` that terminal Buddy uses. Set `BUDDY_DB_PATH` only for isolated smoke tests.
 
 ### Building the Sidecar
 
@@ -65,6 +67,10 @@ To bundle the Buddy MCP server into a sidecar binary:
 ```bash
 BUDDY_DIR=/Users/Sandbox_Jwu/.buddy/server ./scripts/build-buddy-sidecar.sh
 ```
+
+### Teleport Contract
+
+Buddy Teleport must not hatch a random desktop-only Buddy. The desktop app polls `buddy_status` from the Buddy sidecar and renders that terminal Buddy's name, level, XP, species, personality text, ASCII art, and stats. Interactive desktop calls expose safe Buddy tools such as `buddy_pet` and `buddy_observe`; destructive identity-changing tools such as `buddy_hatch` and `buddy_respawn` are intentionally not exposed through the desktop command allowlist.
 
 ## Implementation Status
 

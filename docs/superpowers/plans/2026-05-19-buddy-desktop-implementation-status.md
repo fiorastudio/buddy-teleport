@@ -15,12 +15,14 @@
 - `buddy-desktop/node_modules` and `buddy-desktop/pnpm-lock.yaml` now exist from follow-up work, so frontend build checks are available.
 - A later implementation pass added a Rust MCP polling path in `src-tauri/src/buddy_client.rs` and `src-tauri/src/buddy_poll.rs`. This differs from the earlier TypeScript-only bridge preference; decide whether to keep this Plan A Rust sidecar path or migrate runtime polling back through `buddy-desktop/bridge`.
 - The ignored local `buddy/` reference checkout has a dirty `package-lock.json` from a prior install/build attempt. Do not commit it; root `.gitignore` excludes `buddy/`.
+- The Rust sidecar path now supports `BUDDY_SIDECAR_PATH` for manual teleport verification with an installed Buddy wrapper.
+- A live Rust smoke test can be run with `BUDDY_TELEPORT_LIVE_SIDECAR=/path/to/wrapper BUDDY_DB_PATH=/tmp/buddy.db cargo test live_buddy_sidecar_uses_existing_db_and_supports_pet_observe_when_env_is_set -- --nocapture`.
 
 ## Next Concrete Steps
 
 1. Decide architecture direction: keep Rust MCP polling sidecar or restore the runtime TypeScript bridge boundary.
 2. Build the Buddy sidecar binary with `scripts/build-buddy-sidecar.sh`, preferably with `BUDDY_DIR=/Users/Sandbox_Jwu/.buddy/server` to avoid touching the ignored `buddy/` checkout.
-3. Run `npm run tauri:dev` in `buddy-desktop`.
+3. Run `BUDDY_SIDECAR_PATH=/path/to/buddy-wrapper npm run tauri:dev` in `buddy-desktop` for installed-Buddy verification before packaging.
 4. Use browser/Playwright to visually verify the popup and permission prompt.
 5. Manually verify macOS tray/menu-bar behavior.
 6. Manually pair Claude Desktop Hardware Buddy and verify BLE heartbeat, status ack, and permission response.
@@ -41,12 +43,13 @@
 - `npm test` from `buddy-desktop`
 - `npm run build` from `buddy-desktop`
 - `cargo test` from `buddy-desktop/src-tauri`
+- `BUDDY_DB_PATH=/private/tmp/buddy-teleport-live-db/buddy2.db BUDDY_TELEPORT_LIVE_SIDECAR=/private/tmp/buddy-teleport-live-sidecar cargo test live_buddy_sidecar_uses_existing_db_and_supports_pet_observe_when_env_is_set -- --nocapture` from `buddy-desktop/src-tauri`
 - `npm run docs:check` from workspace root
 - `node scripts/smoke-installed-buddy.mjs` from `buddy-desktop`
 
 ## Manual Or Dependency Gates
 
-- Real Tauri dev run requires a built Buddy sidecar binary under `buddy-desktop/src-tauri/binaries/`.
+- Real Tauri dev run requires either `BUDDY_SIDECAR_PATH` pointing to an executable Buddy wrapper or a built Buddy sidecar binary under `buddy-desktop/src-tauri/binaries/`.
 - Playwright or browser visual verification requires the Vite/Tauri dev server to run after dependencies install.
 - Claude Desktop BLE verification still requires manual Hardware Buddy pairing and prompt approval testing.
 - Native macOS tray/menu-bar behavior still requires `tauri dev` or a built app.
