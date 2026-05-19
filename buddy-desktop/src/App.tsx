@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { listen } from "@tauri-apps/api/event";
 import { invoke } from "@tauri-apps/api/core";
 import { StatusPopup } from "./components/StatusPopup";
+import { connectionFromBuddyPayload } from "./utils/appState.mjs";
 import { buildPermissionDecision } from "./utils/permission.mjs";
 import {
   DEFAULT_BUDDY_STATE,
@@ -61,7 +62,7 @@ export function App() {
               ...DEFAULT_BUDDY_STATE,
               ...initialState,
             },
-            connection: "online",
+            connection: connectionFromBuddyPayload(initialState),
           }));
         }
       } catch (e) {
@@ -86,7 +87,7 @@ export function App() {
         ...DEFAULT_BUDDY_STATE,
         ...refreshedBuddy,
       },
-      connection: "online",
+      connection: connectionFromBuddyPayload(refreshedBuddy, "online"),
       animationState,
       errorMessage: null,
     }));

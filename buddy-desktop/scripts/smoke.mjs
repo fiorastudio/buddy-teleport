@@ -39,4 +39,28 @@ if (!appSource.includes("useState<MascotState>(DEFAULT_MASCOT_STATE)")) {
   throw new Error("App must start from the offline default state until terminal Buddy state arrives");
 }
 
+for (const requiredSnippet of [
+  'name: "buddy_pet"',
+  'name: "buddy_observe"',
+  'invoke<any>("buddy_teleport_back")',
+  "connectionFromBuddyPayload(initialState)",
+]) {
+  if (!appSource.includes(requiredSnippet)) {
+    throw new Error(`App action/state wiring missing expected snippet: ${requiredSnippet}`);
+  }
+}
+
+const statusPopupSource = await readFile(new URL("src/components/StatusPopup.tsx", root), "utf8");
+for (const requiredSnippet of ["onPetBuddy", "onObserveBuddy", "onTeleportBack"]) {
+  if (!statusPopupSource.includes(requiredSnippet)) {
+    throw new Error(`StatusPopup action control missing expected snippet: ${requiredSnippet}`);
+  }
+}
+
+for (const label of ["Pet", "Observe", "Return"]) {
+  if (!new RegExp(`>\\s*${label}\\s*<`).test(statusPopupSource)) {
+    throw new Error(`StatusPopup action control missing expected button label: ${label}`);
+  }
+}
+
 console.log("smoke prerequisites passed");
