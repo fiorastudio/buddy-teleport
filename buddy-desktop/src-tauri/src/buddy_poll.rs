@@ -7,11 +7,17 @@ pub struct PollState {
     pub mcp: BuddyMcpState,
     pub prev_level: u32,
     pub binary_path: Option<String>,
+    pub teleported_to_desktop: bool,
 }
 
 impl Default for PollState {
     fn default() -> Self {
-        Self { mcp: BuddyMcpState::default(), prev_level: 1, binary_path: None }
+        Self {
+            mcp: BuddyMcpState::default(),
+            prev_level: 1,
+            binary_path: None,
+            teleported_to_desktop: true,
+        }
     }
 }
 
@@ -26,9 +32,15 @@ pub fn start_poll(
         {
             let mut state = shared_state.lock().unwrap();
             state.binary_path = Some(binary_path.clone());
+            state.teleported_to_desktop = true;
         }
 
         loop {
+            if !shared_state.lock().unwrap().teleported_to_desktop {
+                tokio::time::sleep(Duration::from_secs(2)).await;
+                continue;
+            }
+
             match run_buddy_session(&binary_path, &shared_state, &app).await {
                 Ok(()) => { backoff_secs = 1; }
                 Err(e) => {

@@ -11,12 +11,14 @@ import { buildStatusPopupViewModel } from "../utils/statusPopupViewModel.mjs";
 export interface StatusPopupProps {
   state?: MascotState | null;
   onPermissionDecision?: (decision: "once" | "deny") => void;
+  onTeleportBack?: () => void;
   permissionError?: string | null;
 }
 
 export function StatusPopup({
   state = DEFAULT_MASCOT_STATE,
   onPermissionDecision = () => {},
+  onTeleportBack = () => {},
   permissionError = null,
 }: StatusPopupProps) {
   const mascotState = state ?? DEFAULT_MASCOT_STATE;
@@ -42,6 +44,16 @@ export function StatusPopup({
       />
 
       <BuddyStats buddy={buddy} />
+
+      {view.showTeleportBack ? (
+        <button
+          type="button"
+          style={styles.teleportBackButton}
+          onClick={onTeleportBack}
+        >
+          Return to terminal
+        </button>
+      ) : null}
 
       {errorMessage ? (
         <p style={styles.error} title={errorMessage}>
@@ -186,5 +198,15 @@ const styles = {
     maxHeight: 48,
     overflow: "hidden",
     overflowWrap: "anywhere" as const,
+  },
+  teleportBackButton: {
+    background: "#1f2937",
+    border: "1px solid #334155",
+    borderRadius: 6,
+    color: "#e2e8f0",
+    cursor: "pointer",
+    fontSize: 12,
+    fontWeight: 700,
+    padding: "8px 10px",
   },
 };

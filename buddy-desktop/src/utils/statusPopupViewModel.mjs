@@ -12,6 +12,7 @@ export function buildStatusPopupViewModel(state = DEFAULT_MASCOT_STATE) {
     isOffline,
     showClaudePanel: Boolean(claude && claude.status !== "inactive"),
     showPermissionPrompt: Boolean(pendingPrompt?.id),
+    showTeleportBack: !isOffline,
     pendingPrompt,
   };
 }

@@ -72,6 +72,19 @@ BUDDY_DIR=/Users/Sandbox_Jwu/.buddy/server ./scripts/build-buddy-sidecar.sh
 
 Buddy Teleport must not hatch a random desktop-only Buddy. The desktop app polls `buddy_status` from the Buddy sidecar and renders that terminal Buddy's name, level, XP, species, personality text, ASCII art, and stats. Interactive desktop calls expose safe Buddy tools such as `buddy_pet` and `buddy_observe`; destructive identity-changing tools such as `buddy_hatch` and `buddy_respawn` are intentionally not exposed through the desktop command allowlist.
 
+Terminal to desktop:
+
+```bash
+/Users/Sandbox_Jwu/Documents/buddy_openhuman_teleport/scripts/buddy-teleport-out.sh
+```
+
+The same launcher is available as the Claude slash command artifact `.claude/commands/buddy-teleport.md`.
+
+Desktop back to terminal:
+
+- Use the popup action **Return to terminal**.
+- The app records a `buddy_observe` event and disables desktop polling so the terminal Buddy remains the source of truth until teleported out again.
+
 ## Implementation Status
 
 - [x] **M0 - Grounding**: Workspace and references established.

@@ -6,6 +6,7 @@ export interface StatusPopupViewModel {
   isOffline: boolean;
   showClaudePanel: boolean;
   showPermissionPrompt: boolean;
+  showTeleportBack: boolean;
   pendingPrompt: NonNullable<NonNullable<MascotState["claudeSession"]>["pendingPrompt"]> | null;
 }
 

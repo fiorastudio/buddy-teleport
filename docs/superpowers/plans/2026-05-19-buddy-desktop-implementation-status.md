@@ -17,15 +17,18 @@
 - The ignored local `buddy/` reference checkout has a dirty `package-lock.json` from a prior install/build attempt. Do not commit it; root `.gitignore` excludes `buddy/`.
 - The Rust sidecar path now supports `BUDDY_SIDECAR_PATH` for manual teleport verification with an installed Buddy wrapper.
 - A live Rust smoke test can be run with `BUDDY_TELEPORT_LIVE_SIDECAR=/path/to/wrapper BUDDY_DB_PATH=/tmp/buddy.db cargo test live_buddy_sidecar_uses_existing_db_and_supports_pet_observe_when_env_is_set -- --nocapture`.
+- Terminal-to-desktop teleport is represented by `.claude/commands/buddy-teleport.md` and `scripts/buddy-teleport-out.sh`.
+- Desktop-to-terminal teleport is represented by the `buddy_teleport_back` Tauri command and popup **Return to terminal** action. It records a `buddy_observe` event, marks Buddy offline in desktop state, and disables polling until the app is restarted/teleported out again.
 
 ## Next Concrete Steps
 
 1. Decide architecture direction: keep Rust MCP polling sidecar or restore the runtime TypeScript bridge boundary.
 2. Build the Buddy sidecar binary with `scripts/build-buddy-sidecar.sh`, preferably with `BUDDY_DIR=/Users/Sandbox_Jwu/.buddy/server` to avoid touching the ignored `buddy/` checkout.
-3. Run `BUDDY_SIDECAR_PATH=/path/to/buddy-wrapper npm run tauri:dev` in `buddy-desktop` for installed-Buddy verification before packaging.
-4. Use browser/Playwright to visually verify the popup and permission prompt.
-5. Manually verify macOS tray/menu-bar behavior.
-6. Manually pair Claude Desktop Hardware Buddy and verify BLE heartbeat, status ack, and permission response.
+3. Run `.claude/commands/buddy-teleport.md` or `scripts/buddy-teleport-out.sh` to verify terminal-to-desktop teleport.
+4. Use the popup **Return to terminal** action to verify desktop-to-terminal return.
+5. Use browser/Playwright to visually verify the popup and permission prompt.
+6. Manually verify macOS tray/menu-bar behavior.
+7. Manually pair Claude Desktop Hardware Buddy and verify BLE heartbeat, status ack, and permission response.
 
 ## Completed Offline
 

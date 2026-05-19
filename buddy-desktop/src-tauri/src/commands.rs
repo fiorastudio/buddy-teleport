@@ -1,7 +1,7 @@
 use crate::buddy_poll::PollState;
 use crate::mascot_state::frontend_buddy_payload;
 use std::sync::{Arc, Mutex};
-use tauri::State;
+use tauri::{Emitter, State};
 use serde_json::Value;
 
 pub struct BuddyPollHandle(pub Arc<Mutex<PollState>>);
@@ -29,6 +29,48 @@ pub fn buddy_tool(
     }
 
     Ok(result.to_string())
+}
+
+#[tauri::command]
+pub fn buddy_teleport_back(
+    state: State<BuddyPollHandle>,
+    app: tauri::AppHandle,
+) -> Result<Value, String> {
+    let binary_path = state
+        .0
+        .lock()
+        .unwrap()
+        .binary_path
+        .clone()
+        .ok_or("Buddy sidecar path is not ready yet")?;
+
+    let (_result, refreshed_state) = call_buddy_tool_once(
+        &binary_path,
+        "buddy_observe",
+        serde_json::json!({
+            "summary": "Buddy teleported back from the desktop app to the terminal.",
+            "claims": [],
+            "edges": []
+        }),
+    )?;
+
+    let payload = frontend_buddy_payload(&refreshed_state);
+    {
+        let mut poll_state = state.0.lock().unwrap();
+        poll_state.prev_level = poll_state.mcp.level;
+        poll_state.mcp = refreshed_state;
+        poll_state.mcp.online = false;
+        poll_state.teleported_to_desktop = false;
+    }
+
+    let _ = app.emit("buddy-teleported-back", serde_json::json!({
+        "connection": "offline",
+        "animationState": "sleep",
+        "buddy": payload,
+        "errorMessage": "Buddy returned to terminal."
+    }));
+
+    Ok(payload)
 }
 
 /// Get the current cached buddy state synchronously.
@@ -105,5 +147,16 @@ mod tests {
         assert_eq!(payload["species"], "VOID CAT");
         assert_eq!(payload["personality"], "Loyal to the terminal session.");
         assert_eq!(payload["stats"]["wisdom"], 88);
+    }
+
+    #[test]
+    fn teleport_back_can_disable_desktop_polling_state() {
+        let mut state = PollState::default();
+        assert!(state.teleported_to_desktop);
+        state.teleported_to_desktop = false;
+        state.mcp.online = false;
+
+        assert!(!state.teleported_to_desktop);
+        assert!(!state.mcp.online);
     }
 }

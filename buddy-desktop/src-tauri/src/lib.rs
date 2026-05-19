@@ -74,6 +74,7 @@ pub fn run() {
             commands::greet,
             commands::buddy_tool,
             commands::buddy_get_state,
+            commands::buddy_teleport_back,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

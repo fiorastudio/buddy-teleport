@@ -16,6 +16,7 @@ export function App() {
   useEffect(() => {
     let unlistenMascot: (() => void) | undefined;
     let unlistenOffline: (() => void) | undefined;
+    let unlistenTeleportedBack: (() => void) | undefined;
 
     async function setupListeners() {
       unlistenMascot = await listen<any>("mascot-state-updated", (event) => {
@@ -36,6 +37,17 @@ export function App() {
           connection: "offline",
           animationState: "sleep",
           errorMessage: (event.payload as any)?.message || "Buddy bridge is offline",
+        }));
+      });
+
+      unlistenTeleportedBack = await listen<any>("buddy-teleported-back", (event) => {
+        setState((current) => ({
+          ...current,
+          ...event.payload,
+          buddy: {
+            ...DEFAULT_BUDDY_STATE,
+            ...(event.payload?.buddy || current.buddy),
+          },
         }));
       });
       
@@ -62,6 +74,7 @@ export function App() {
     return () => {
       if (unlistenMascot) unlistenMascot();
       if (unlistenOffline) unlistenOffline();
+      if (unlistenTeleportedBack) unlistenTeleportedBack();
     };
   }, []);
 
@@ -80,10 +93,30 @@ export function App() {
     }
   }
 
+  async function handleTeleportBack() {
+    try {
+      const returnedBuddy = await invoke<any>("buddy_teleport_back");
+      setState((current) => ({
+        ...current,
+        buddy: {
+          ...DEFAULT_BUDDY_STATE,
+          ...returnedBuddy,
+        },
+        connection: "offline",
+        animationState: "sleep",
+        errorMessage: "Buddy returned to terminal.",
+      }));
+      setPermissionError(null);
+    } catch (error) {
+      setPermissionError(error instanceof Error ? error.message : String(error));
+    }
+  }
+
   return (
     <StatusPopup
       state={state}
       onPermissionDecision={handlePermissionDecision}
+      onTeleportBack={handleTeleportBack}
       permissionError={permissionError}
     />
   );
