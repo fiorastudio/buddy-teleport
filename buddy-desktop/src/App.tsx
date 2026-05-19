@@ -78,6 +78,50 @@ export function App() {
     };
   }, []);
 
+  async function refreshBuddyState(animationState: MascotState["animationState"] = "idle") {
+    const refreshedBuddy = await invoke<any>("buddy_get_state");
+    setState((current) => ({
+      ...current,
+      buddy: {
+        ...DEFAULT_BUDDY_STATE,
+        ...refreshedBuddy,
+      },
+      connection: "online",
+      animationState,
+      errorMessage: null,
+    }));
+  }
+
+  async function handlePetBuddy() {
+    try {
+      await invoke("buddy_tool", {
+        name: "buddy_pet",
+        args: {},
+      });
+      await refreshBuddyState("heart");
+      setPermissionError(null);
+    } catch (error) {
+      setPermissionError(error instanceof Error ? error.message : String(error));
+    }
+  }
+
+  async function handleObserveBuddy() {
+    try {
+      await invoke("buddy_tool", {
+        name: "buddy_observe",
+        args: {
+          summary: "Buddy checked in from the desktop popup.",
+          claims: [],
+          edges: [],
+        },
+      });
+      await refreshBuddyState("celebrate");
+      setPermissionError(null);
+    } catch (error) {
+      setPermissionError(error instanceof Error ? error.message : String(error));
+    }
+  }
+
   async function handlePermissionDecision(decision: "once" | "deny") {
     try {
       await invoke("buddy_tool", {
@@ -116,6 +160,8 @@ export function App() {
     <StatusPopup
       state={state}
       onPermissionDecision={handlePermissionDecision}
+      onPetBuddy={handlePetBuddy}
+      onObserveBuddy={handleObserveBuddy}
       onTeleportBack={handleTeleportBack}
       permissionError={permissionError}
     />

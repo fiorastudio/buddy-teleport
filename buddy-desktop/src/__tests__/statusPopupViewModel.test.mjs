@@ -10,6 +10,7 @@ test("offline state shows quiet title without Claude panel", () => {
   assert.equal(view.isOffline, true);
   assert.equal(view.showClaudePanel, false);
   assert.equal(view.showPermissionPrompt, false);
+  assert.equal(view.showBuddyActions, false);
   assert.equal(view.showTeleportBack, false);
 });
 
@@ -25,6 +26,7 @@ test("active Claude session shows session panel", () => {
 
   assert.equal(view.title, "Status");
   assert.equal(view.showClaudePanel, true);
+  assert.equal(view.showBuddyActions, true);
   assert.equal(view.showTeleportBack, true);
 });
 

@@ -18,17 +18,17 @@
 - The Rust sidecar path now supports `BUDDY_SIDECAR_PATH` for manual teleport verification with an installed Buddy wrapper.
 - A live Rust smoke test can be run with `BUDDY_TELEPORT_LIVE_SIDECAR=/path/to/wrapper BUDDY_DB_PATH=/tmp/buddy.db cargo test live_buddy_sidecar_uses_existing_db_and_supports_pet_observe_when_env_is_set -- --nocapture`.
 - Terminal-to-desktop teleport is represented by `.claude/commands/buddy-teleport.md` and `scripts/buddy-teleport-out.sh`.
-- Desktop-to-terminal teleport is represented by the `buddy_teleport_back` Tauri command and popup **Return to terminal** action. It records a `buddy_observe` event, marks Buddy offline in desktop state, and disables polling until the app is restarted/teleported out again.
+- Desktop-to-terminal teleport is represented by the `buddy_teleport_back` Tauri command and popup **Return** action. It records a `buddy_observe` event, marks Buddy offline in desktop state, and disables polling until the app is restarted/teleported out again.
+- Popup Buddy actions now expose `buddy_pet` and `buddy_observe` through the same safe Tauri command allowlist, then refresh the cached terminal Buddy state.
 
 ## Next Concrete Steps
 
 1. Decide architecture direction: keep Rust MCP polling sidecar or restore the runtime TypeScript bridge boundary.
 2. Build the Buddy sidecar binary with `scripts/build-buddy-sidecar.sh`, preferably with `BUDDY_DIR=/Users/Sandbox_Jwu/.buddy/server` to avoid touching the ignored `buddy/` checkout.
-3. Run `.claude/commands/buddy-teleport.md` or `scripts/buddy-teleport-out.sh` to verify terminal-to-desktop teleport.
-4. Use the popup **Return to terminal** action to verify desktop-to-terminal return.
-5. Use browser/Playwright to visually verify the popup and permission prompt.
-6. Manually verify macOS tray/menu-bar behavior.
-7. Manually pair Claude Desktop Hardware Buddy and verify BLE heartbeat, status ack, and permission response.
+3. Use the popup **Pet**, **Observe**, and **Return** actions in a native app session against the real terminal Buddy DB.
+4. Add Playwright or another browser automation dependency if screenshot-level visual verification is required; current repo dependencies do not include Playwright.
+5. Manually verify macOS tray/menu-bar behavior.
+6. Manually pair Claude Desktop Hardware Buddy and verify BLE heartbeat, status ack, and permission response.
 
 ## Completed Offline
 
@@ -36,7 +36,7 @@
 - BD-002: Tauri-shaped app scaffold exists with MIT license, Vite entry files, React popup entry, and Rust shell modules.
 - BD-003 to BD-005: TypeScript Buddy bridge package exists with MCP JSON-RPC client, process launcher, normalized state mapper, sidecar protocol, and tests.
 - BD-006 to BD-007: shared state contract, popup components, offline/default state, and view-model tests exist.
-- BD-008 to BD-011: bridge sidecar launch spec, sidecar event protocol, Rust event boundary parsing, and Buddy tool forwarding exist. Rust does not parse Buddy MCP responses.
+- BD-008 to BD-011: bridge sidecar launch spec, sidecar event protocol, Rust event boundary parsing, Rust Buddy MCP status parsing, safe Buddy tool forwarding, and teleport-back state handling exist.
 - BD-013 to BD-014: BLE protocol fixtures, line buffering, command parsing, permission serialization, and fake peripheral prototype exist.
 - BD-016 to BD-018: provisional BLE decision, Claude session reducer states, popup prompt overlay, and permission response serialization exist.
 - BD-019 to BD-020: opt-in floating mascot state machine and local character pack validation exist.
@@ -49,11 +49,13 @@
 - `BUDDY_DB_PATH=/private/tmp/buddy-teleport-live-db/buddy2.db BUDDY_TELEPORT_LIVE_SIDECAR=/private/tmp/buddy-teleport-live-sidecar cargo test live_buddy_sidecar_uses_existing_db_and_supports_pet_observe_when_env_is_set -- --nocapture` from `buddy-desktop/src-tauri`
 - `npm run docs:check` from workspace root
 - `node scripts/smoke-installed-buddy.mjs` from `buddy-desktop`
+- `BUDDY_DB_PATH=/private/tmp/buddy-teleport-gui/buddy.db ./scripts/buddy-teleport-out.sh` launched the Vite dev server and native Tauri app after seeding the temp DB with `TeleportAda`; startup reached `target/debug/buddy-desktop` with no Buddy parser errors, and `curl http://127.0.0.1:1420/` returned the React entry HTML with host permissions.
 
 ## Manual Or Dependency Gates
 
 - Real Tauri dev run requires either `BUDDY_SIDECAR_PATH` pointing to an executable Buddy wrapper or a built Buddy sidecar binary under `buddy-desktop/src-tauri/binaries/`.
-- Playwright or browser visual verification requires the Vite/Tauri dev server to run after dependencies install.
+- Screenshot-level Playwright verification is not yet available because the repo does not currently depend on Playwright.
+- A blank Buddy DB is not a valid teleport target: the runtime poller expects an existing terminal Buddy stat card. Seed a temp DB or use the real terminal Buddy DB when doing isolated runtime checks.
 - Claude Desktop BLE verification still requires manual Hardware Buddy pairing and prompt approval testing.
 - Native macOS tray/menu-bar behavior still requires `tauri dev` or a built app.
 

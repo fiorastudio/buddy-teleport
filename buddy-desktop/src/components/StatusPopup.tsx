@@ -11,6 +11,8 @@ import { buildStatusPopupViewModel } from "../utils/statusPopupViewModel.mjs";
 export interface StatusPopupProps {
   state?: MascotState | null;
   onPermissionDecision?: (decision: "once" | "deny") => void;
+  onPetBuddy?: () => void;
+  onObserveBuddy?: () => void;
   onTeleportBack?: () => void;
   permissionError?: string | null;
 }
@@ -18,6 +20,8 @@ export interface StatusPopupProps {
 export function StatusPopup({
   state = DEFAULT_MASCOT_STATE,
   onPermissionDecision = () => {},
+  onPetBuddy = () => {},
+  onObserveBuddy = () => {},
   onTeleportBack = () => {},
   permissionError = null,
 }: StatusPopupProps) {
@@ -45,14 +49,35 @@ export function StatusPopup({
 
       <BuddyStats buddy={buddy} />
 
-      {view.showTeleportBack ? (
-        <button
-          type="button"
-          style={styles.teleportBackButton}
-          onClick={onTeleportBack}
-        >
-          Return to terminal
-        </button>
+      {view.showBuddyActions ? (
+        <div style={styles.actionRow} aria-label="Buddy actions">
+          <button
+            type="button"
+            style={styles.actionButton}
+            onClick={onPetBuddy}
+            title="Pet Buddy"
+          >
+            Pet
+          </button>
+          <button
+            type="button"
+            style={styles.actionButton}
+            onClick={onObserveBuddy}
+            title="Record a desktop check-in"
+          >
+            Observe
+          </button>
+          {view.showTeleportBack ? (
+            <button
+              type="button"
+              style={styles.teleportBackButton}
+              onClick={onTeleportBack}
+              title="Return Buddy to the terminal"
+            >
+              Return
+            </button>
+          ) : null}
+        </div>
       ) : null}
 
       {errorMessage ? (
@@ -199,7 +224,13 @@ const styles = {
     overflow: "hidden",
     overflowWrap: "anywhere" as const,
   },
-  teleportBackButton: {
+  actionRow: {
+    display: "grid",
+    gap: 8,
+    gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+    minWidth: 0,
+  },
+  actionButton: {
     background: "#1f2937",
     border: "1px solid #334155",
     borderRadius: 6,
@@ -207,6 +238,24 @@ const styles = {
     cursor: "pointer",
     fontSize: 12,
     fontWeight: 700,
+    minWidth: 0,
+    overflow: "hidden",
     padding: "8px 10px",
+    textOverflow: "ellipsis",
+    whiteSpace: "nowrap" as const,
+  },
+  teleportBackButton: {
+    background: "#172554",
+    border: "1px solid #1d4ed8",
+    borderRadius: 6,
+    color: "#dbeafe",
+    cursor: "pointer",
+    fontSize: 12,
+    fontWeight: 700,
+    minWidth: 0,
+    overflow: "hidden",
+    padding: "8px 10px",
+    textOverflow: "ellipsis",
+    whiteSpace: "nowrap" as const,
   },
 };
