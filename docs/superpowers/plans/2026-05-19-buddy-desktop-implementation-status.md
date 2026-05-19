@@ -9,6 +9,7 @@
 - Main implementation: `buddy-desktop`
 - User story source of truth: `docs/superpowers/plans/2026-05-19-buddy-desktop-user-stories.md`
 - Current status review: `docs/review/user-stories-review.html`
+- Current UI approval prototype: `docs/review/buddy-desktop-interaction-prototype.html`
 - Local Buddy upstream source/install: `/Users/Sandbox_Jwu/.buddy/server`
 - BLE reference repo: `claude-desktop-buddy`
 - Do not clone Buddy again unless explicitly asked; use the local installed Buddy source and the installed MCP entry at `/Users/Sandbox_Jwu/.buddy/server/dist/server/index.js`.
@@ -22,15 +23,18 @@
 - Popup Buddy actions now expose `buddy_pet` and `buddy_observe` through the same safe Tauri command allowlist, then refresh the cached terminal Buddy state. Desktop-originated `buddy_observe` calls preserve caller-provided `cwd` and otherwise default to `BUDDY_WORKSPACE_CWD`/process cwd; the teleport-out script exports `BUDDY_WORKSPACE_CWD` as the terminal workspace root.
 - Permission approve/deny no longer routes through `buddy_tool`; the frontend builds a Claude BLE `permission` frame and sends it to the `ble_respond_permission` Tauri command boundary.
 - The desktop visual surface intentionally does not render Buddy's terminal ASCII status card. The parser extracts identity, XP, stats, personality, and sprite-only lines; React may animate the sprite in the avatar area, but stats/card chrome render through dedicated visual sections.
+- User review found the current live popup actions too hard to discover and the reaction/speech bubble treatment too clipped. Do not implement a revised React UI until `docs/review/buddy-desktop-interaction-prototype.html` is approved or revised.
 
 ## Next Concrete Steps
 
-1. Decide architecture direction: keep Rust MCP polling sidecar or restore the runtime TypeScript bridge boundary.
-2. Build the Buddy sidecar binary with `scripts/build-buddy-sidecar.sh`, preferably with `BUDDY_DIR=/Users/Sandbox_Jwu/.buddy/server` to avoid touching the ignored `buddy/` checkout.
-3. Use the popup **Pet**, **Observe**, and **Return** actions in a native app session against the real terminal Buddy DB.
-4. Add Playwright or another browser automation dependency if screenshot-level visual verification is required; current repo dependencies do not include Playwright.
-5. Manually verify macOS tray/menu-bar behavior.
-6. Manually pair Claude Desktop Hardware Buddy and verify BLE heartbeat, status ack, and permission response.
+1. Get explicit user approval or revisions for `docs/review/buddy-desktop-interaction-prototype.html`.
+2. After approval, implement the prototype in React so **Pat**, **Observe**, and **Return** are persistent visible controls and Buddy reactions render as wrapped speech bubble text instead of clipped terminal ASCII.
+3. Decide architecture direction: keep Rust MCP polling sidecar or restore the runtime TypeScript bridge boundary.
+4. Build the Buddy sidecar binary with `scripts/build-buddy-sidecar.sh`, preferably with `BUDDY_DIR=/Users/Sandbox_Jwu/.buddy/server` to avoid touching the ignored `buddy/` checkout.
+5. Use the popup **Pet**, **Observe**, and **Return** actions in a native app session against the real terminal Buddy DB.
+6. Add Playwright or another browser automation dependency if screenshot-level visual verification is required; current repo dependencies do not include Playwright.
+7. Manually verify macOS tray/menu-bar behavior.
+8. Manually pair Claude Desktop Hardware Buddy and verify BLE heartbeat, status ack, and permission response.
 
 ## Completed Offline
 
@@ -39,6 +43,7 @@
 - BD-003 to BD-005: TypeScript Buddy bridge package exists with MCP JSON-RPC client, process launcher, normalized state mapper, sidecar protocol, and tests.
 - BD-006 to BD-007: shared state contract, popup components, offline/default state, and view-model tests exist.
 - Buddy visual treatment derives from parsed state fields instead of dumping the terminal card into the desktop UI; top stat controls avatar accent/surface, sprite-only ASCII can animate in the avatar frame, and personality appears as a compact trait line.
+- A static interaction prototype exists at `docs/review/buddy-desktop-interaction-prototype.html` for approval of persistent Buddy controls and wrapped speech-bubble reaction rendering.
 - BD-008 to BD-011: bridge sidecar launch spec, sidecar event protocol, Rust event boundary parsing, Rust Buddy MCP status parsing, safe Buddy tool forwarding, and teleport-back state handling exist.
 - BD-013 to BD-014: BLE protocol fixtures, line buffering, command parsing, permission serialization, and fake peripheral prototype exist.
 - BD-016 to BD-018: provisional BLE decision, Claude session reducer states, popup prompt overlay, permission response serialization, and a native Tauri BLE permission command boundary exist.
