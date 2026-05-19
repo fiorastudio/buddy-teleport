@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Buddy Desktop - TDD User Story Backlog</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: #111827;
+    color: #e5e7eb;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    line-height: 1.55;
+  }
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: #172033;
+    border-bottom: 1px solid #334155;
+    padding: 16px 24px;
+  }
+  h1 { margin: 0; color: #7dd3fc; font-size: 20px; }
+  header p { margin: 6px 0 0; color: #a7b4c5; font-size: 13px; }
+  main { max-width: 1180px; margin: 0 auto; padding: 28px 24px 64px; }
+  section {
+    background: #182235;
+    border: 1px solid #2d3c55;
+    border-radius: 8px;
+    padding: 20px;
+    margin: 18px 0;
+  }
+  h2 { margin: 0 0 12px; color: #bae6fd; font-size: 17px; }
+  h3 { color: #d9f99d; font-size: 14px; margin: 18px 0 8px; }
+  p, li, td { color: #d1d5db; font-size: 14px; }
+  code {
+    background: #26344d;
+    color: #93c5fd;
+    padding: 2px 5px;
+    border-radius: 4px;
+    font-size: 12px;
+  }
+  pre {
+    background: #0b1220;
+    border: 1px solid #26344d;
+    border-radius: 8px;
+    padding: 14px;
+    overflow-x: auto;
+    color: #a7f3d0;
+    font-size: 12px;
+    line-height: 1.45;
+  }
+  table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+  th {
+    text-align: left;
+    background: #22304a;
+    color: #bfdbfe;
+    padding: 9px 10px;
+    font-size: 13px;
+  }
+  td { border-bottom: 1px solid #2b3a55; padding: 9px 10px; vertical-align: top; }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 14px;
+  }
+  .card {
+    background: #131d2e;
+    border: 1px solid #2b3a55;
+    border-radius: 8px;
+    padding: 14px;
+  }
+  .story {
+    border-left: 4px solid #0ea5e9;
+  }
+  .p0 { border-left-color: #f97316; }
+  .p1 { border-left-color: #eab308; }
+  .p2 { border-left-color: #22c55e; }
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 8px 0 12px;
+  }
+  .pill {
+    display: inline-flex;
+    border: 1px solid #3b4b66;
+    background: #22304a;
+    border-radius: 999px;
+    padding: 3px 8px;
+    font-size: 12px;
+    color: #c7d2fe;
+  }
+  .callout { background: #102a1f; border-color: #276749; }
+  .warning { background: #2a2110; border-color: #7c5b20; }
+  .status-done { border-left-color: #22c55e; }
+  .status-gated { border-left-color: #f59e0b; }
+  .status-next { border-left-color: #38bdf8; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Buddy Desktop - TDD User Story Backlog</h1>
+  <p>Issue tracker compatible backlog with dependencies, acceptance criteria, TDD plan, and parallel work lanes.</p>
+</header>
+
+<main>
+  <section class="callout">
+    <h2>Execution Strategy</h2>
+    <p>Build the tray MVP first while running the BLE prototype in parallel. Keep Buddy integration in TypeScript, keep native shell work in Tauri/Rust, and defer optional floating mascot work until the menu bar/tray flow is stable.</p>
+  </section>
+
+  <section class="callout">
+    <h2>Fresh Agent Handoff</h2>
+    <p>Start in <code>/Users/Sandbox_Jwu/Documents/buddy_openhuman_teleport</code>. Main implementation is <code>buddy-desktop</code>. Use local Buddy source/install at <code>/Users/Sandbox_Jwu/.buddy/server</code> and MCP entry <code>/Users/Sandbox_Jwu/.buddy/server/dist/server/index.js</code>. Use <code>claude-desktop-buddy</code> as the BLE protocol reference.</p>
+    <p>Do not clone Buddy again unless explicitly asked. Do not retry <code>npm install</code> in a loop: the sandboxed install hung for several minutes and left no <code>node_modules</code> or <code>package-lock.json</code> in <code>buddy-desktop</code>.</p>
+  </section>
+
+  <section>
+    <h2>Implementation Status</h2>
+    <div class="grid">
+      <div class="card story status-done"><h3>Completed Offline</h3><p>BD-001 through BD-014 and BD-016 through BD-020 have offline implementation slices: docs checks, Tauri-shaped scaffold, TypeScript MCP bridge, sidecar protocol, popup state/UI wiring, BLE protocol prototype, permission serialization, floating mascot state machine, and character pack validation.</p></div>
+      <div class="card story status-done"><h3>Passing Verification</h3><p><code>npm test</code> in <code>buddy-desktop</code>, <code>cargo test</code> in <code>buddy-desktop/src-tauri</code>, <code>npm run docs:check</code>, and <code>node scripts/smoke-installed-buddy.mjs</code> all passed.</p></div>
+      <div class="card story status-gated"><h3>Dependency Gates</h3><p>Real Vite/Tauri build, <code>tauri dev</code>, and Playwright/browser visual verification require frontend/Tauri packages. Dependency installation is currently blocked by sandbox/network behavior.</p></div>
+      <div class="card story status-gated"><h3>Manual Gates</h3><p>macOS tray behavior and Claude Desktop Hardware Buddy BLE pairing still need manual verification on the host with a running app.</p></div>
+      <div class="card story status-next"><h3>Next Commands</h3><p>After dependencies are available, run <code>npm run build</code>, <code>npm run dev</code> or <code>npm run tauri:dev</code>, then browser/Playwright checks and Claude Desktop BLE pairing.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Milestones</h2>
+    <table>
+      <tr><th>Milestone</th><th>Goal</th><th>Exit Criteria</th></tr>
+      <tr><td>M0</td><td>Grounding</td><td>References and license boundaries documented</td></tr>
+      <tr><td>M1</td><td>Buddy Bridge</td><td>Bridge returns normalized Buddy state with tests</td></tr>
+      <tr><td>M2</td><td>Tray MVP</td><td>Tray icon appears and popup renders Buddy state</td></tr>
+      <tr><td>M3</td><td>Resilience</td><td>Bridge restart/offline behavior tested</td></tr>
+      <tr><td>M4</td><td>BLE Proof</td><td>Claude Desktop connects to <code>Claude-XXXX</code></td></tr>
+      <tr><td>M5</td><td>BLE Product</td><td>Claude session state and prompts appear in popup</td></tr>
+    </table>
+  </section>
+
+  <section>
+    <h2>Parallel Lanes</h2>
+    <div class="grid">
+      <div class="card"><h3>Bridge</h3><p>BD-003, BD-004, BD-005, BD-011. Owns MCP and Buddy reuse in TypeScript.</p></div>
+      <div class="card"><h3>Shell</h3><p>BD-002, BD-008, BD-010, BD-019. Owns Tauri lifecycle, tray, popup window, optional mascot.</p></div>
+      <div class="card"><h3>UI</h3><p>BD-006, BD-007, BD-009, BD-017, BD-018. Owns popup components and state rendering.</p></div>
+      <div class="card"><h3>BLE</h3><p>BD-013, BD-014, BD-015, BD-016. Owns protocol fixtures and peripheral proof.</p></div>
+      <div class="card"><h3>QA</h3><p>BD-001, BD-012. Owns docs checks, smoke tests, and milestone verification.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Critical Path</h2>
+    <pre>Tray MVP:
+BD-001 -> BD-002 -> BD-006 -> BD-007
+BD-001 -> BD-003 -> BD-004 -> BD-005
+BD-005 + BD-007 -> BD-008 -> BD-009 -> BD-010 -> BD-012
+
+BLE Product:
+Tray MVP + BD-013 -> BD-014 -> BD-016 -> BD-017 -> BD-018</pre>
+  </section>
+
+  <section>
+    <h2>Sprint 1 - MVP Foundation</h2>
+    <table>
+      <tr><th>Worker</th><th>Lane</th><th>Issues</th></tr>
+      <tr><td>A</td><td>Bridge</td><td>BD-003, BD-004, BD-005</td></tr>
+      <tr><td>B</td><td>Shell</td><td>BD-002, start BD-008</td></tr>
+      <tr><td>C</td><td>UI</td><td>BD-006, BD-007</td></tr>
+      <tr><td>D</td><td>BLE</td><td>BD-013</td></tr>
+    </table>
+  </section>
+
+  <section>
+    <h2>Sprint 2 - Tray MVP</h2>
+    <table>
+      <tr><th>Worker</th><th>Lane</th><th>Issues</th></tr>
+      <tr><td>A</td><td>Shell/UI Integration</td><td>BD-009, BD-010</td></tr>
+      <tr><td>B</td><td>Bridge</td><td>BD-011</td></tr>
+      <tr><td>C</td><td>BLE</td><td>BD-014</td></tr>
+      <tr><td>D</td><td>QA</td><td>BD-012</td></tr>
+    </table>
+  </section>
+
+  <section>
+    <h2>Issue Index</h2>
+    <div class="grid">
+      <div class="card story p0"><h3>BD-001 References</h3><p>Document upstream refs and license boundaries. Blocks all implementation.</p><div class="meta"><span class="pill">p0</span><span class="pill">qa</span></div></div>
+      <div class="card story p0"><h3>BD-002 Scaffold App</h3><p>Create MIT Tauri React app shell.</p><div class="meta"><span class="pill">p0</span><span class="pill">shell</span></div></div>
+      <div class="card story p0"><h3>BD-003 Bridge Skeleton</h3><p>Create TypeScript bridge package and test runner.</p><div class="meta"><span class="pill">p0</span><span class="pill">bridge</span></div></div>
+      <div class="card story p0"><h3>BD-004 MCP Client</h3><p>Implement JSON-RPC MCP handshake and tool calls in TypeScript.</p><div class="meta"><span class="pill">p0</span><span class="pill">bridge</span></div></div>
+      <div class="card story p0"><h3>BD-005 Normalize State</h3><p>Map Buddy status into typed desktop state with fixture tests.</p><div class="meta"><span class="pill">p0</span><span class="pill">bridge</span></div></div>
+      <div class="card story p0"><h3>BD-006 State Contract</h3><p>Define shared frontend state types and offline defaults.</p><div class="meta"><span class="pill">p0</span><span class="pill">ui</span></div></div>
+      <div class="card story p0"><h3>BD-007 Popup UI</h3><p>Build status popup against mock state.</p><div class="meta"><span class="pill">p0</span><span class="pill">ui</span></div></div>
+      <div class="card story p0"><h3>BD-008 Bridge Process</h3><p>Launch, monitor, restart bridge from Tauri.</p><div class="meta"><span class="pill">p0</span><span class="pill">shell</span></div></div>
+      <div class="card story p0"><h3>BD-009 Live State</h3><p>Connect popup to Tauri bridge events.</p><div class="meta"><span class="pill">p0</span><span class="pill">ui</span></div></div>
+      <div class="card story p0"><h3>BD-010 Tray Behavior</h3><p>Menu bar/tray icon opens compact popup with zero idle clutter.</p><div class="meta"><span class="pill">p0</span><span class="pill">shell</span></div></div>
+      <div class="card story p1"><h3>BD-011 Buddy Tool Calls</h3><p>Forward popup actions to real Buddy MCP tools.</p><div class="meta"><span class="pill">p1</span><span class="pill">bridge</span></div></div>
+      <div class="card story p0"><h3>BD-012 MVP Smoke</h3><p>End-to-end smoke test and bridge restart verification.</p><div class="meta"><span class="pill">p0</span><span class="pill">qa</span></div></div>
+      <div class="card story p0"><h3>BD-013 BLE Fixtures</h3><p>Protocol fixtures and newline fragmentation tests.</p><div class="meta"><span class="pill">p0</span><span class="pill">ble</span></div></div>
+      <div class="card story p0"><h3>BD-014 Rust BLE Spike</h3><p>Try BLE peripheral mode and Claude Desktop connection.</p><div class="meta"><span class="pill">p0</span><span class="pill">ble</span></div></div>
+      <div class="card story p1"><h3>BD-015 Swift Fallback</h3><p>Fallback CoreBluetooth helper if Rust is unstable.</p><div class="meta"><span class="pill">p1</span><span class="pill">ble</span></div></div>
+      <div class="card story p0"><h3>BD-016 BLE Decision</h3><p>Pick Rust or Swift helper based on spike evidence.</p><div class="meta"><span class="pill">p0</span><span class="pill">ble</span></div></div>
+      <div class="card story p1"><h3>BD-017 Claude State</h3><p>Merge Claude activity into popup state and animation.</p><div class="meta"><span class="pill">p1</span><span class="pill">ble</span><span class="pill">ui</span></div></div>
+      <div class="card story p1"><h3>BD-018 Approve/Deny</h3><p>Approve or deny Claude permission prompts from popup.</p><div class="meta"><span class="pill">p1</span><span class="pill">ble</span><span class="pill">ui</span></div></div>
+      <div class="card story p2"><h3>BD-019 Floating Mascot</h3><p>Optional user-controlled floating mascot window.</p><div class="meta"><span class="pill">p2</span><span class="pill">shell</span></div></div>
+      <div class="card story p2"><h3>BD-020 Character Packs</h3><p>Load local GIF character packs with safe path validation.</p><div class="meta"><span class="pill">p2</span><span class="pill">ui</span></div></div>
+    </div>
+  </section>
+
+  <section class="warning">
+    <h2>Definition Of Done</h2>
+    <ul>
+      <li>Failing test exists before implementation where feasible.</li>
+      <li>No Buddy upstream source files are modified.</li>
+      <li>No OpenHuman code or assets are copied.</li>
+      <li>Rust shell does not parse Buddy MCP responses.</li>
+      <li>Acceptance criteria are covered by tests or explicit manual verification.</li>
+    </ul>
+  </section>
+</main>
+</body>
+</html>

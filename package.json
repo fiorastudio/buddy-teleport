@@ -1,0 +1,9 @@
+{
+  "name": "buddy-openhuman-teleport-workspace",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "docs:check": "node scripts/check-doc-boundaries.mjs",
+    "test": "npm run docs:check"
+  }
+}

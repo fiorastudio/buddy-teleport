@@ -1,0 +1,8 @@
+buddy/
+openhuman/
+openhuman-reference/
+buddy-desktop/node_modules/
+buddy-desktop/src-tauri/target/
+buddy-desktop/src-tauri/binaries/
+node_modules/
+.DS_Store

@@ -1,0 +1,48 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Buddy Desktop",
+  "version": "0.1.0",
+  "identifier": "studio.buddy.desktop",
+  "build": {
+    "frontendDist": "../dist",
+    "devUrl": "http://localhost:1420",
+    "beforeDevCommand": "",
+    "beforeBuildCommand": ""
+  },
+  "app": {
+    "windows": [
+      {
+        "label": "status-popup",
+        "title": "Buddy",
+        "width": 320,
+        "height": 420,
+        "visible": false,
+        "decorations": false,
+        "always_on_top": true,
+        "skip_taskbar": true
+      }
+    ],
+    "security": {
+      "csp": null
+    },
+    "macOSPrivateApi": true
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "externalBin": [
+      "binaries/buddy-server"
+    ]
+  },
+  "plugins": {
+    "shell": {
+      "sidecar": [
+        {
+          "name": "buddy-server",
+          "command": "binaries/buddy-server",
+          "args": []
+        }
+      ]
+    }
+  }
+}

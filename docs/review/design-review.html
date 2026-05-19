@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Buddy Desktop — Design Review</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: #1a1a2e;
+    color: #e0e0e0;
+    min-height: 100vh;
+  }
+  #toolbar {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+    background: #16213e;
+    border-bottom: 1px solid #0f3460;
+    padding: 10px 20px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  #toolbar h1 { font-size: 15px; color: #5af; font-weight: 600; flex: 1; }
+  #toolbar button {
+    padding: 7px 16px; border-radius: 6px; border: none;
+    font-size: 13px; cursor: pointer; font-weight: 500;
+  }
+  #btn-add { background: #f5c842; color: #1a1a2e; }
+  #btn-add:hover { background: #ffd700; }
+  #btn-save { background: #5af; color: #1a1a2e; }
+  #btn-save:hover { background: #7cf; }
+  #btn-clear { background: #444; color: #ccc; }
+  #btn-clear:hover { background: #555; }
+  #save-hint { font-size: 11px; color: #888; }
+
+  #content {
+    max-width: 860px;
+    margin: 70px auto 60px;
+    padding: 24px 32px;
+  }
+
+  /* Spec rendering */
+  h1.spec { font-size: 22px; color: #5af; margin-bottom: 8px; }
+  .meta { font-size: 12px; color: #888; margin-bottom: 24px; }
+  h2 { font-size: 16px; color: #9df; margin: 28px 0 10px; border-bottom: 1px solid #0f3460; padding-bottom: 6px; }
+  h3 { font-size: 14px; color: #bdf; margin: 18px 0 8px; }
+  p { font-size: 13px; line-height: 1.7; color: #ccc; margin-bottom: 10px; }
+  code { background: #0f3460; padding: 2px 5px; border-radius: 3px; font-size: 12px; color: #9df; font-family: "SF Mono", monospace; }
+  pre {
+    background: #0d1b2a; border: 1px solid #0f3460; border-radius: 6px;
+    padding: 14px; overflow-x: auto; margin: 10px 0;
+    font-size: 12px; line-height: 1.5; color: #9df; font-family: "SF Mono", monospace;
+  }
+  table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 12px; }
+  th { background: #0f3460; color: #9df; padding: 8px 10px; text-align: left; }
+  td { border-bottom: 1px solid #1a2a4a; padding: 7px 10px; color: #ccc; }
+  tr:hover td { background: #0f1f35; }
+  ul { padding-left: 20px; margin: 6px 0; }
+  li { font-size: 13px; color: #ccc; line-height: 1.7; }
+  .badge {
+    display: inline-block; padding: 2px 8px; border-radius: 10px;
+    font-size: 11px; font-weight: 600; margin-left: 6px;
+  }
+  .badge-plan-a { background: #1a4a1a; color: #4f4; }
+  .badge-plan-b { background: #4a1a1a; color: #f44; }
+  .section { background: #13233a; border-radius: 8px; padding: 18px 22px; margin-bottom: 18px; }
+  .divider { border: none; border-top: 1px solid #0f3460; margin: 24px 0; }
+  .state-table td:first-child { font-family: monospace; color: #f5c842; }
+  .approve-banner {
+    background: #1a3a1a; border: 1px solid #2a6a2a; border-radius: 8px;
+    padding: 16px 20px; margin-top: 24px; text-align: center;
+  }
+  .approve-banner p { color: #4f4; font-size: 14px; margin-bottom: 12px; }
+  .approve-btn {
+    background: #2a8a2a; color: #fff; border: none; border-radius: 6px;
+    padding: 10px 28px; font-size: 14px; font-weight: 600; cursor: pointer;
+    margin: 0 6px;
+  }
+  .approve-btn:hover { background: #3aaa3a; }
+  .reject-btn {
+    background: #5a1a1a; color: #f88; border: 1px solid #8a2a2a; border-radius: 6px;
+    padding: 10px 28px; font-size: 14px; cursor: pointer; margin: 0 6px;
+  }
+  .reject-btn:hover { background: #6a2a2a; }
+
+  /* Sticky notes */
+  .sticky {
+    position: fixed;
+    width: 220px; min-height: 100px;
+    background: #f5c842;
+    border-radius: 4px;
+    box-shadow: 3px 3px 10px rgba(0,0,0,0.5);
+    padding: 0;
+    cursor: move;
+    z-index: 500;
+    user-select: none;
+  }
+  .sticky-header {
+    background: #e6b800;
+    padding: 6px 8px;
+    border-radius: 4px 4px 0 0;
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 11px; color: #333; font-weight: 600;
+  }
+  .sticky-delete {
+    background: none; border: none; cursor: pointer;
+    color: #8a6000; font-size: 14px; padding: 0 2px; line-height: 1;
+  }
+  .sticky-delete:hover { color: #c00; }
+  .sticky textarea {
+    width: 100%; min-height: 80px;
+    background: transparent; border: none; outline: none;
+    padding: 8px; font-size: 12px; color: #333;
+    font-family: -apple-system, sans-serif;
+    resize: vertical; cursor: text;
+  }
+
+  /* Feedback panel */
+  #feedback-panel {
+    display: none;
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 2000;
+    background: #16213e; border-top: 2px solid #5af;
+    padding: 16px 24px;
+  }
+  #feedback-panel h3 { color: #5af; font-size: 13px; margin-bottom: 8px; }
+  #feedback-json {
+    width: 100%; height: 120px;
+    background: #0d1b2a; color: #9df;
+    border: 1px solid #0f3460; border-radius: 4px;
+    padding: 8px; font-family: monospace; font-size: 11px;
+    resize: none;
+  }
+  #close-panel { background: #444; color: #ccc; border: none; border-radius: 4px; padding: 6px 14px; cursor: pointer; margin-top: 8px; }
+</style>
+</head>
+<body>
+
+<div id="toolbar">
+  <h1>🐧 Buddy Desktop — Design Review</h1>
+  <span id="save-hint">Add sticky notes, then click Save Feedback</span>
+  <button id="btn-add" onclick="addNote()">+ Sticky Note</button>
+  <button id="btn-save" onclick="saveFeedback()">💾 Save Feedback</button>
+  <button id="btn-clear" onclick="clearNotes()">Clear Notes</button>
+</div>
+
+<div id="content">
+
+  <h1 class="spec">Buddy Desktop Integration Design</h1>
+  <div class="meta">Date: 2026-05-18 &nbsp;·&nbsp; Status: ✓ Approved 2026-05-18 &nbsp;·&nbsp; Plan A written and ready</div>
+
+  <!-- APPROVE BANNER -->
+  <div class="approve-banner">
+    <p>Ready for your review. Use sticky notes to leave feedback, then approve or request changes below.</p>
+    <button class="approve-btn" onclick="recordApproval('approved')">✓ Approved — proceed to execution</button>
+    <button class="reject-btn" onclick="recordApproval('changes-requested')">✗ Changes needed (see notes)</button>
+  </div>
+
+  <hr class="divider">
+
+  <h2>Problem Statement</h2>
+  <div class="section">
+    <p><code>fiorastudio/buddy</code> lives entirely in the terminal — it only reacts when an AI client explicitly calls a tool. <code>anthropics/claude-desktop-buddy</code> gives Claude Desktop a hardware companion (ESP32) via BLE, but requires physical hardware.</p>
+    <p>This design brings both systems into a single <strong>native desktop mascot window</strong> built on <code>tinyhumansai/openhuman</code> (Tauri), so buddy's virtual pet is always visible and reactive to real Claude activity — no hardware required.</p>
+  </div>
+
+  <h2>Chosen Approach <span class="badge badge-plan-a">Plan A: MCP Sidecar</span> <span class="badge badge-plan-b">Plan B: BLE</span></h2>
+  <div class="section">
+    <p>Two data sources feed a unified mascot state:</p>
+    <table>
+      <tr><th>Source</th><th>Protocol</th><th>What it provides</th><th>Plan</th></tr>
+      <tr><td><code>fiorastudio/buddy</code> sidecar</td><td>stdio JSON-RPC (MCP)</td><td>XP, level, personality stats, reactions</td><td><span class="badge badge-plan-a">A</span></td></tr>
+      <tr><td>Claude Desktop</td><td>BLE Nordic UART (claude-desktop-buddy protocol)</td><td>Active sessions, permission prompts, token counts</td><td><span class="badge badge-plan-b">B</span></td></tr>
+    </table>
+  </div>
+
+  <h2>Architecture</h2>
+  <div class="section">
+    <pre>┌───────────────────────────────────────────────────────────┐
+│  Tauri App (openhuman fork)                                │
+│                                                            │
+│  ┌──────────────────────────────┐   Tauri events           │
+│  │        Rust Backend          │ ─────────────────► React  │
+│  │                              │                   Mascot  │
+│  │  buddy_sidecar.rs            │ ◄───────────────── Window │
+│  │  buddy_client.rs  (MCP)      │   Tauri commands          │
+│  │  buddy_poll.rs    (2s timer) │                           │
+│  │  buddy_commands.rs           │                           │
+│  │  ble_companion.rs (BLE)      │                           │
+│  │  mascot_state.rs  (merge)    │                           │
+│  └──────────┬───────────────────┘                           │
+│             │ stdin/stdout (JSON-RPC)                       │
+└─────────────┼─────────────────────────────────────────────┘
+              ▼
+     buddy sidecar (Node.js, unchanged) → ~/.buddy/buddy.db
+
+              ╔══════════════════╗
+              ║  BLE Nordic UART ║  (Plan B)
+              ╚════════╤═════════╝
+                       ▼
+              Claude Desktop (sends heartbeat snapshots)</pre>
+  </div>
+
+  <h2>Unified State Machine (7 states)</h2>
+  <div class="section">
+    <table class="state-table">
+      <tr><th>State</th><th>Trigger</th><th>Visual</th><th>Plan</th></tr>
+      <tr><td>sleep</td><td>BLE disconnected AND sidecar offline</td><td>Sleeping animation</td><td>A+B</td></tr>
+      <tr><td>idle</td><td>Connected, no active sessions</td><td>Default idle</td><td>A+B</td></tr>
+      <tr><td>busy</td><td>running &gt; 0</td><td>Active/working</td><td>B</td></tr>
+      <tr><td>attention</td><td>Permission prompt pending</td><td>Alert + approve/deny overlay</td><td>B</td></tr>
+      <tr><td>celebrate</td><td>buddy level-up detected</td><td>Celebration</td><td>A</td></tr>
+      <tr><td>dizzy</td><td>BLE heartbeat gap &gt; 30s</td><td>Dizzy</td><td>B</td></tr>
+      <tr><td>heart</td><td>Permission approved &lt; 5s</td><td>Heart (brief)</td><td>B</td></tr>
+    </table>
+  </div>
+
+  <h2>Sidecar Binary: pkg approach</h2>
+  <div class="section">
+    <p>buddy's compiled Node.js output is bundled into a self-contained binary using <code>pkg</code>. Chosen over <code>bun build --compile</code> because buddy has native SQLite deps (<code>better-sqlite3</code>).</p>
+    <pre>npx pkg dist/server/index.js \
+  --target node18-macos-arm64 \
+  --output binaries/buddy-server-aarch64-apple-darwin</pre>
+  </div>
+
+  <h2>claude-desktop-buddy Compatibility</h2>
+  <div class="section">
+    <p>The Tauri app acts as a <strong>software claude-desktop-buddy</strong> — it advertises the same Nordic UART Service BLE UUID (<code>6e400001-b5a3-f393-e0a9-e50e24dcca9e</code>) so Claude Desktop connects to it exactly as it would to the physical ESP32.</p>
+    <p>Character packs use the same JSON manifest + GIF format:</p>
+    <pre>{ "name": "buddy-penguin",
+  "colors": { "body": "#FFFFFF", "bg": "#000000" },
+  "states": { "sleep": "sleep.gif", "idle": ["idle_0.gif","idle_1.gif"], ... } }</pre>
+    <p>Packs install by drag-and-drop onto the mascot window or via Tauri command. Same assets work on ESP32 hardware and the desktop app.</p>
+  </div>
+
+  <h2>New Files — Plan A <span class="badge badge-plan-a">Rust + React</span></h2>
+  <div class="section">
+    <table>
+      <tr><th>File</th><th>Responsibility</th></tr>
+      <tr><td><code>buddy_sidecar.rs</code></td><td>Spawn/kill sidecar, stdio handles, newline JSON-RPC framing</td></tr>
+      <tr><td><code>buddy_client.rs</code></td><td>MCP client: initialize handshake, call_tool(), stat card parser</td></tr>
+      <tr><td><code>buddy_poll.rs</code></td><td>2s timer loop, state cache, emits <code>mascot-state-updated</code> Tauri event</td></tr>
+      <tr><td><code>buddy_commands.rs</code></td><td>Tauri commands: <code>buddy_tool</code>, <code>buddy_get_state</code></td></tr>
+      <tr><td><code>mascot_state.rs</code></td><td>BuddyMcpState struct, AnimationState enum, compute_animation_state()</td></tr>
+      <tr><td><code>BuddyMascot.tsx</code></td><td>Root component, listens for <code>mascot-state-updated</code> events</td></tr>
+      <tr><td><code>BuddyStats.tsx</code></td><td>Level, XP bar, personality stat bars</td></tr>
+      <tr><td><code>CharacterDisplay.tsx</code></td><td>ASCII art renderer (GIF support in Plan B)</td></tr>
+    </table>
+  </div>
+
+  <h2>Error Handling</h2>
+  <div class="section">
+    <table>
+      <tr><th>Failure</th><th>Response</th></tr>
+      <tr><td>Sidecar crash</td><td>Exponential backoff restart (1→2→4→max 30s), emit <code>buddy-offline</code></td></tr>
+      <tr><td>3 consecutive MCP errors</td><td>Trigger sidecar restart</td></tr>
+      <tr><td>BLE unavailable (Linux/Windows)</td><td>Stub out gracefully, mascot runs on MCP data only</td></tr>
+      <tr><td>Character pack invalid</td><td>Fall back to ASCII art, log warning, no crash</td></tr>
+    </table>
+  </div>
+
+  <h2>Out of Scope — Plan A (deferred to Plan B)</h2>
+  <div class="section">
+    <ul>
+      <li>BLE Nordic UART peripheral (claude-desktop-buddy session data)</li>
+      <li>Permission approve/deny overlay (<code>ApproveOverlay.tsx</code>)</li>
+      <li>GIF character pack support in <code>CharacterDisplay.tsx</code></li>
+      <li>Windows/Linux BLE support</li>
+    </ul>
+  </div>
+
+  <h2>Plan A — 11 Tasks Overview</h2>
+  <div class="section">
+    <table>
+      <tr><th>#</th><th>Task</th><th>Key deliverable</th></tr>
+      <tr><td>1</td><td>Clone repos and verify builds</td><td>openhuman/ and buddy/ cloned, both building</td></tr>
+      <tr><td>2</td><td>Build buddy sidecar binary (pkg)</td><td>Self-contained binary at src-tauri/binaries/</td></tr>
+      <tr><td>3</td><td>Tauri config and Cargo deps</td><td>serde_json, regex, tokio added; tauri.conf.json updated</td></tr>
+      <tr><td>4</td><td>buddy_sidecar.rs</td><td>Process spawn + newline JSON-RPC framing</td></tr>
+      <tr><td>5</td><td>buddy_client.rs + mascot_state.rs</td><td>MCP client + stat card parser (4 unit tests)</td></tr>
+      <tr><td>6</td><td>buddy_poll.rs</td><td>Background polling loop (3 state machine tests)</td></tr>
+      <tr><td>7</td><td>buddy_commands.rs + lib.rs wiring</td><td>Tauri commands registered, poll started on app init</td></tr>
+      <tr><td>8</td><td>BuddyStats.tsx + types/buddy.ts</td><td>Stats component + shared TS types</td></tr>
+      <tr><td>9</td><td>CharacterDisplay.tsx + BuddyMascot.tsx</td><td>Full mascot UI component</td></tr>
+      <tr><td>10</td><td>main.tsx routing</td><td>?window=mascot&companion=buddy branch wired up</td></tr>
+      <tr><td>11</td><td>End-to-end smoke test</td><td>Manual verification: mascot renders, sidecar crash recovery</td></tr>
+    </table>
+    <p style="margin-top:10px; font-size:12px; color:#888;">Full plan with complete code: <code>docs/superpowers/plans/2026-05-18-buddy-desktop-plan-a-mcp-sidecar.md</code></p>
+  </div>
+
+  <!-- APPROVE BANNER (bottom) -->
+  <div class="approve-banner">
+    <p>Does this design look right? Approve to kick off Plan A execution, or request changes via sticky notes.</p>
+    <button class="approve-btn" onclick="recordApproval('approved')">✓ Approved — proceed to execution</button>
+    <button class="reject-btn" onclick="recordApproval('changes-requested')">✗ Changes needed (see notes)</button>
+  </div>
+
+</div><!-- end #content -->
+
+<!-- Sticky notes container -->
+<div id="sticky-layer"></div>
+
+<!-- Feedback panel -->
+<div id="feedback-panel">
+  <h3>Feedback JSON — copy this and paste it to Claude, or save the downloaded file</h3>
+  <textarea id="feedback-json" readonly></textarea>
+  <br>
+  <button id="close-panel" onclick="document.getElementById('feedback-panel').style.display='none'">Close</button>
+</div>
+
+<script>
+  let notes = JSON.parse(localStorage.getItem('buddy-review-notes') || '[]');
+  let decision = localStorage.getItem('buddy-review-decision') || null;
+  let noteCounter = 0;
+
+  function renderNotes() {
+    const layer = document.getElementById('sticky-layer');
+    layer.innerHTML = '';
+    noteCounter = 0;
+    notes.forEach((n, i) => createStickyEl(n, i));
+  }
+
+  function createStickyEl(note, index) {
+    const el = document.createElement('div');
+    el.className = 'sticky';
+    el.style.left = note.x + 'px';
+    el.style.top = note.y + 'px';
+    el.innerHTML = `
+      <div class="sticky-header">
+        📝 Note ${index + 1}
+        <button class="sticky-delete" onclick="deleteNote(${index})">✕</button>
+      </div>
+      <textarea placeholder="Type feedback here...">${note.text}</textarea>
+    `;
+    const ta = el.querySelector('textarea');
+    ta.addEventListener('input', () => {
+      notes[index].text = ta.value;
+      save();
+    });
+    makeDraggable(el, index);
+    document.getElementById('sticky-layer').appendChild(el);
+  }
+
+  function addNote() {
+    const note = {
+      x: 60 + (notes.length * 20) % 200,
+      y: 100 + (notes.length * 30) % 300,
+      text: ''
+    };
+    notes.push(note);
+    createStickyEl(note, notes.length - 1);
+    save();
+  }
+
+  function deleteNote(index) {
+    notes.splice(index, 1);
+    save();
+    renderNotes();
+  }
+
+  function clearNotes() {
+    if (confirm('Clear all sticky notes?')) {
+      notes = [];
+      save();
+      renderNotes();
+    }
+  }
+
+  function makeDraggable(el, index) {
+    const header = el.querySelector('.sticky-header');
+    let dragging = false, ox, oy;
+    header.addEventListener('mousedown', (e) => {
+      dragging = true;
+      ox = e.clientX - el.offsetLeft;
+      oy = e.clientY - el.offsetTop;
+      el.style.zIndex = 600;
+      e.preventDefault();
+    });
+    document.addEventListener('mousemove', (e) => {
+      if (!dragging) return;
+      el.style.left = (e.clientX - ox) + 'px';
+      el.style.top  = (e.clientY - oy) + 'px';
+    });
+    document.addEventListener('mouseup', () => {
+      if (dragging && notes[index]) {
+        notes[index].x = parseInt(el.style.left);
+        notes[index].y = parseInt(el.style.top);
+        save();
+      }
+      dragging = false;
+      el.style.zIndex = 500;
+    });
+  }
+
+  function save() {
+    localStorage.setItem('buddy-review-notes', JSON.stringify(notes));
+  }
+
+  function recordApproval(decision) {
+    localStorage.setItem('buddy-review-decision', decision);
+    saveFeedback(decision);
+  }
+
+  function saveFeedback(decisionOverride) {
+    const d = decisionOverride || localStorage.getItem('buddy-review-decision') || 'pending';
+    const feedback = {
+      decision: d,
+      timestamp: new Date().toISOString(),
+      notes: notes.map((n, i) => ({ id: i + 1, text: n.text })).filter(n => n.text.trim())
+    };
+    const json = JSON.stringify(feedback, null, 2);
+
+    // Show in panel
+    document.getElementById('feedback-json').value = json;
+    document.getElementById('feedback-panel').style.display = 'block';
+
+    // Download as file
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'design-review-feedback.json';
+    a.click();
+    URL.revokeObjectURL(url);
+
+    if (d === 'approved') {
+      document.getElementById('save-hint').textContent = '✓ Approved! Claude will read the downloaded file.';
+      document.getElementById('save-hint').style.color = '#4f4';
+    } else if (d === 'changes-requested') {
+      document.getElementById('save-hint').textContent = '✗ Changes noted. Claude will read the downloaded file.';
+      document.getElementById('save-hint').style.color = '#f84';
+    }
+  }
+
+  // Restore notes on load
+  renderNotes();
+  if (localStorage.getItem('buddy-review-decision')) {
+    const d = localStorage.getItem('buddy-review-decision');
+    document.getElementById('save-hint').textContent =
+      d === 'approved' ? '✓ Previously approved' : '✗ Changes previously requested';
+  }
+</script>
+
+</body>
+</html>

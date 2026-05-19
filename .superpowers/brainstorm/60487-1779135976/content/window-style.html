@@ -1,0 +1,391 @@
+<style>
+  .question-header { margin-bottom: 2rem; }
+  .question-header .step { font-size: 0.7rem; color: var(--accent); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.4rem; font-weight: 600; }
+
+  /* Cards grid */
+  .style-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem; margin-bottom: 2.5rem; }
+  .style-card {
+    background: var(--bg-secondary);
+    border: 2px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    display: flex;
+    flex-direction: column;
+  }
+  .style-card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.12); }
+  .style-card.selected { border-color: var(--selected-border); background: var(--selected-bg); }
+  .style-card .card-preview {
+    background: var(--bg-tertiary);
+    height: 180px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    border-bottom: 1px solid var(--border);
+  }
+  .style-card .card-label {
+    padding: 1rem 1.1rem 0.75rem;
+    flex: 1;
+  }
+  .style-card .card-label h3 { font-size: 0.95rem; margin-bottom: 0.3rem; }
+  .style-card .card-label p { font-size: 0.8rem; color: var(--text-secondary); line-height: 1.4; }
+  .style-card .choice-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px; height: 22px;
+    border-radius: 6px;
+    background: var(--bg-tertiary);
+    color: var(--text-secondary);
+    font-size: 0.7rem;
+    font-weight: 700;
+    margin-bottom: 0.35rem;
+  }
+  .style-card.selected .choice-badge { background: var(--accent); color: white; }
+
+  /* ---- Mockup: Floating mascot ---- */
+  .mock-desktop {
+    width: 100%; height: 100%;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    position: relative;
+  }
+  .mock-app-window {
+    position: absolute; top: 12px; left: 12px;
+    width: 120px; height: 100px;
+    background: #2d2d2f;
+    border-radius: 6px;
+    border: 1px solid #424245;
+    overflow: hidden;
+  }
+  .mock-app-window .titlebar {
+    height: 16px; background: #3d3d3f;
+    display: flex; align-items: center; gap: 3px; padding: 0 5px;
+  }
+  .mock-app-window .titlebar span {
+    width: 5px; height: 5px; border-radius: 50%;
+  }
+  .mock-app-window .titlebar span:nth-child(1) { background: #ff5f56; }
+  .mock-app-window .titlebar span:nth-child(2) { background: #ffbd2e; }
+  .mock-app-window .titlebar span:nth-child(3) { background: #27c93f; }
+  .mock-app-window .window-content {
+    padding: 6px; font-size: 5px; color: #86868b; line-height: 1.6;
+  }
+  .mock-pet-window {
+    position: absolute; bottom: 14px; right: 12px;
+    width: 64px; height: 72px;
+    background: rgba(30, 30, 40, 0.92);
+    border-radius: 14px;
+    border: 1.5px solid rgba(255,255,255,0.15);
+    backdrop-filter: blur(12px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    gap: 4px;
+  }
+  .mock-pet-window .pet-ascii {
+    font-size: 8px; line-height: 1.2;
+    color: #f0f0f0;
+    text-align: center;
+    font-family: monospace;
+  }
+  .mock-pet-window .pet-name {
+    font-size: 6px; color: rgba(255,255,255,0.5);
+    font-family: monospace;
+  }
+  .mock-pet-window .pet-bubble {
+    font-size: 5px; color: #0a84ff;
+    background: rgba(10,132,255,0.15);
+    border-radius: 4px; padding: 2px 4px;
+    max-width: 56px; text-align: center;
+    line-height: 1.3;
+  }
+  .mock-drag-hint {
+    position: absolute; top: 8px; right: 8px;
+    font-size: 5.5px; color: rgba(255,255,255,0.35);
+    font-family: monospace;
+  }
+
+  /* ---- Mockup: Menu bar ---- */
+  .mock-menubar-desktop {
+    width: 100%; height: 100%;
+    background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+    position: relative;
+  }
+  .mock-menubar {
+    position: absolute; top: 0; left: 0; right: 0;
+    height: 20px; background: rgba(20,20,20,0.85);
+    backdrop-filter: blur(20px);
+    display: flex; align-items: center; justify-content: flex-end;
+    padding: 0 8px; gap: 8px;
+  }
+  .mock-menubar .menu-item { font-size: 5.5px; color: rgba(255,255,255,0.7); }
+  .mock-menubar .buddy-icon {
+    width: 14px; height: 14px; background: rgba(255,255,255,0.1);
+    border-radius: 4px; display: flex; align-items: center; justify-content: center;
+    font-size: 7px; cursor: pointer; border: 1px solid rgba(255,255,255,0.2);
+  }
+  .mock-popup {
+    position: absolute; top: 24px; right: 8px;
+    width: 100px; background: rgba(28,28,30,0.95);
+    border-radius: 10px; border: 1px solid rgba(255,255,255,0.12);
+    padding: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    backdrop-filter: blur(20px);
+  }
+  .mock-popup .popup-pet {
+    text-align: center; font-family: monospace; font-size: 7px;
+    color: #f0f0f0; line-height: 1.2; margin-bottom: 4px;
+  }
+  .mock-popup .popup-stat { font-size: 5px; color: #86868b; margin-bottom: 2px; }
+  .mock-popup .popup-bar {
+    height: 3px; background: #3d3d3f; border-radius: 2px; margin-bottom: 4px; overflow: hidden;
+  }
+  .mock-popup .popup-bar-fill { height: 100%; background: #0a84ff; border-radius: 2px; }
+  .mock-popup .popup-reaction {
+    font-size: 5px; color: #0a84ff;
+    background: rgba(10,132,255,0.12); border-radius: 4px;
+    padding: 3px 4px; line-height: 1.4; font-family: monospace;
+  }
+
+  /* ---- Mockup: Sidebar panel ---- */
+  .mock-app-with-sidebar {
+    width: 100%; height: 100%;
+    background: #1d1d1f;
+    display: flex;
+  }
+  .mock-sidebar-nav {
+    width: 32px; background: #2d2d2f;
+    border-right: 1px solid #424245;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 8px 0; gap: 6px;
+  }
+  .mock-sidebar-nav .nav-icon {
+    width: 18px; height: 18px; background: #3d3d3f;
+    border-radius: 5px; display: flex; align-items: center;
+    justify-content: center; font-size: 8px;
+  }
+  .mock-sidebar-nav .nav-icon.active { background: #0a84ff; }
+  .mock-main-area { flex: 1; padding: 10px; }
+  .mock-editor-lines { }
+  .mock-editor-line {
+    height: 4px; background: #3d3d3f; border-radius: 2px; margin-bottom: 3px;
+  }
+  .mock-editor-line.short { width: 60%; }
+  .mock-editor-line.medium { width: 80%; }
+  .mock-buddy-panel {
+    width: 70px; background: #2d2d2f;
+    border-left: 1px solid #424245;
+    display: flex; flex-direction: column;
+    align-items: center; padding: 8px 6px; gap: 5px;
+  }
+  .mock-buddy-panel .panel-label {
+    font-size: 4.5px; color: #86868b; text-transform: uppercase; letter-spacing: 0.08em;
+  }
+  .mock-buddy-panel .panel-pet {
+    font-family: monospace; font-size: 7px; color: #f0f0f0; line-height: 1.2; text-align: center;
+  }
+  .mock-buddy-panel .panel-xp {
+    font-size: 4.5px; color: #86868b; text-align: center;
+  }
+  .mock-buddy-panel .panel-xp-bar {
+    width: 100%; height: 3px; background: #3d3d3f; border-radius: 2px; overflow: hidden;
+  }
+  .mock-buddy-panel .panel-xp-fill { height: 100%; background: #30d158; border-radius: 2px; width: 35%; }
+  .mock-buddy-panel .panel-bubble {
+    font-size: 4.5px; color: #0a84ff; background: rgba(10,132,255,0.12);
+    border-radius: 4px; padding: 3px 4px; line-height: 1.4;
+    font-family: monospace; text-align: center; width: 100%;
+  }
+
+  /* ---- Sticky note system ---- */
+  .sticky-zone { margin-top: 0.4rem; }
+  .sticky-note {
+    background: #fef08a;
+    border-radius: 4px 4px 4px 4px;
+    padding: 8px 10px;
+    position: relative;
+    box-shadow: 2px 3px 8px rgba(0,0,0,0.18);
+    transform: rotate(-0.5deg);
+  }
+  @media (prefers-color-scheme: dark) {
+    .sticky-note { background: #854d0e; color: #fef9c3; }
+    .sticky-note textarea { background: rgba(255,255,255,0.08); color: #fef9c3; border-color: rgba(255,255,255,0.15); }
+    .sticky-note textarea::placeholder { color: rgba(254,249,195,0.5); }
+  }
+  .sticky-note::before {
+    content: '';
+    position: absolute; top: -6px; left: 50%; transform: translateX(-50%);
+    width: 24px; height: 6px;
+    background: rgba(0,0,0,0.12);
+    border-radius: 3px 3px 0 0;
+  }
+  .sticky-note .sticky-label {
+    font-size: 0.6rem; font-weight: 700; color: #78350f;
+    text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px;
+  }
+  @media (prefers-color-scheme: dark) { .sticky-note .sticky-label { color: #fde68a; } }
+  .sticky-note textarea {
+    width: 100%; border: 1px solid rgba(0,0,0,0.12); border-radius: 3px;
+    padding: 4px 6px; font-size: 0.75rem; resize: vertical; min-height: 48px;
+    background: rgba(255,255,255,0.4); font-family: inherit; line-height: 1.4;
+    outline: none;
+  }
+  .sticky-note textarea:focus { border-color: #d97706; background: rgba(255,255,255,0.6); }
+  .sticky-save-btn {
+    margin-top: 4px; font-size: 0.65rem; padding: 2px 8px;
+    background: #d97706; color: white; border: none; border-radius: 3px;
+    cursor: pointer; float: right;
+  }
+  .sticky-save-btn:hover { background: #b45309; }
+  .sticky-saved { font-size: 0.65rem; color: #15803d; margin-top: 4px; display: none; clear: both; }
+</style>
+
+<div class="question-header">
+  <div class="step">Question 1 of 3 · Buddy in Tauri</div>
+  <h2>How should buddy live on the desktop?</h2>
+  <p class="subtitle">Click a style to select it — leave a sticky note below each option if you have thoughts</p>
+</div>
+
+<div class="style-cards">
+
+  <!-- Option A: Floating mascot -->
+  <div class="style-card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-preview">
+      <div class="mock-desktop">
+        <div class="mock-app-window">
+          <div class="titlebar">
+            <span></span><span></span><span></span>
+          </div>
+          <div class="window-content">
+            // main.rs<br>
+            fn run() {<br>
+            &nbsp;&nbsp;app.start();<br>
+            }
+          </div>
+        </div>
+        <div class="mock-pet-window">
+          <div class="pet-ascii">(@&gt;@)<br>/(   )\<br>`- -'</div>
+          <div class="pet-bubble">+12 XP! nice commit</div>
+          <div class="pet-name">buddy · Lv.3</div>
+        </div>
+        <div class="mock-drag-hint">⋮⋮ drag</div>
+      </div>
+    </div>
+    <div class="card-label">
+      <div class="choice-badge">A</div>
+      <h3>Floating mascot window</h3>
+      <p>Always-on-top transparent window. Buddy floats over everything, draggable anywhere. Modeled directly on OpenHuman's <code>mascot_native_window.rs</code>.</p>
+    </div>
+  </div>
+
+  <!-- Option B: Menu bar app -->
+  <div class="style-card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-preview">
+      <div class="mock-menubar-desktop">
+        <div class="mock-menubar">
+          <div class="menu-item">Fri 10:23</div>
+          <div class="menu-item">🔋</div>
+          <div class="buddy-icon">🐧</div>
+        </div>
+        <div class="mock-popup">
+          <div class="popup-pet">(@&gt;@)<br>/(   )\<br>`- -'</div>
+          <div class="popup-stat">XP · Lv.3 · 8/17</div>
+          <div class="popup-bar"><div class="popup-bar-fill" style="width:47%"></div></div>
+          <div class="popup-reaction">Nice work on that<br>auth refactor 🐧</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-label">
+      <div class="choice-badge">B</div>
+      <h3>Menu bar / tray app</h3>
+      <p>Buddy lives in the macOS menu bar (or system tray on Windows/Linux). Click the icon to expand a status popup. Zero screen clutter when not in use.</p>
+    </div>
+  </div>
+
+  <!-- Option C: Sidebar panel -->
+  <div class="style-card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-preview">
+      <div class="mock-app-with-sidebar">
+        <div class="mock-sidebar-nav">
+          <div class="nav-icon">🏠</div>
+          <div class="nav-icon active">🐧</div>
+          <div class="nav-icon">⚙️</div>
+        </div>
+        <div class="mock-main-area">
+          <div class="mock-editor-line medium"></div>
+          <div class="mock-editor-line short"></div>
+          <div class="mock-editor-line medium"></div>
+          <div class="mock-editor-line short"></div>
+          <div class="mock-editor-line medium"></div>
+        </div>
+        <div class="mock-buddy-panel">
+          <div class="panel-label">buddy</div>
+          <div class="panel-pet">(@&gt;@)<br>/(   )\</div>
+          <div class="panel-xp">Lv.3 · 8/17 XP</div>
+          <div class="panel-xp-bar"><div class="panel-xp-fill"></div></div>
+          <div class="panel-bubble">Solid<br>debugging<br>session!</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-label">
+      <div class="choice-badge">C</div>
+      <h3>Sidebar / companion panel</h3>
+      <p>Buddy lives inside a dedicated app window as a persistent right-side panel. Full context: stats, reaction history, guard-mode log, settings.</p>
+    </div>
+  </div>
+
+</div>
+
+<!-- Sticky notes row -->
+<div style="display:grid; grid-template-columns: repeat(3,1fr); gap:1.25rem; margin-bottom: 2rem;">
+  <div class="sticky-zone">
+    <div class="sticky-note" id="note-a">
+      <div class="sticky-label">Notes on Option A</div>
+      <textarea id="text-a" placeholder="What do you love or hate about this? Any ideas…"></textarea>
+      <button class="sticky-save-btn" onclick="saveNote('a')">Save ✓</button>
+      <div class="sticky-saved" id="saved-a">Saved!</div>
+    </div>
+  </div>
+  <div class="sticky-zone">
+    <div class="sticky-note" id="note-b">
+      <div class="sticky-label">Notes on Option B</div>
+      <textarea id="text-b" placeholder="What do you love or hate about this? Any ideas…"></textarea>
+      <button class="sticky-save-btn" onclick="saveNote('b')">Save ✓</button>
+      <div class="sticky-saved" id="saved-b">Saved!</div>
+    </div>
+  </div>
+  <div class="sticky-zone">
+    <div class="sticky-note" id="note-c">
+      <div class="sticky-label">Notes on Option C</div>
+      <textarea id="text-c" placeholder="What do you love or hate about this? Any ideas…"></textarea>
+      <button class="sticky-save-btn" onclick="saveNote('c')">Save ✓</button>
+      <div class="sticky-saved" id="saved-c">Saved!</div>
+    </div>
+  </div>
+</div>
+
+<script>
+function saveNote(option) {
+  const text = document.getElementById('text-' + option).value.trim();
+  if (!text) return;
+  window.brainstorm.send({
+    type: 'sticky-note',
+    option: option,
+    text: text
+  });
+  const saved = document.getElementById('saved-' + option);
+  saved.style.display = 'block';
+  setTimeout(() => saved.style.display = 'none', 2000);
+}
+// Also save on Ctrl+Enter / Cmd+Enter inside textarea
+['a','b','c'].forEach(opt => {
+  const ta = document.getElementById('text-' + opt);
+  if (ta) ta.addEventListener('keydown', e => {
+    if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') saveNote(opt);
+  });
+});
+</script>

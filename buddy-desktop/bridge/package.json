@@ -1,0 +1,17 @@
+{
+  "name": "@buddy-desktop/bridge",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Buddy desktop bridge for MCP stdio and normalized state mapping.",
+  "type": "commonjs",
+  "main": "src/index.js",
+  "bin": {
+    "buddy-desktop-bridge": "src/sidecar.js"
+  },
+  "scripts": {
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

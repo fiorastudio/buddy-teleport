@@ -1,0 +1,26 @@
+{
+  "result": {
+    "structuredContent": {
+      "name": "buddy",
+      "level": 2,
+      "xp": 18,
+      "xpToNext": 32,
+      "stats": {
+        "debugging": 21,
+        "patience": 12,
+        "chaos": 9,
+        "wisdom": 7,
+        "snark": 44
+      },
+      "rarity": "RARE",
+      "species": "OWL",
+      "asciiArt": ["(o,o)"]
+    },
+    "content": [
+      {
+        "type": "text",
+        "text": "stale fallback text"
+      }
+    ]
+  }
+}

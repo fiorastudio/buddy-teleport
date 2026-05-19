@@ -1,0 +1,16 @@
+{
+  "name": "buddy",
+  "level": 1,
+  "xp": 3,
+  "xpToNext": 17,
+  "stats": {
+    "debugging": 14,
+    "patience": 11,
+    "chaos": 26,
+    "wisdom": 3,
+    "snark": 59
+  },
+  "rarity": "COMMON",
+  "species": "PENGUIN",
+  "source": "stat_card"
+}

@@ -1,0 +1,21 @@
+DISPLAY VERBATIM: Show the full stat card below in a code block. Do not summarize.
+
+.__________________________________________.
+| ★★ RARE                         VOID CAT |
+|                                          |
+|  |\      /|                              |
+|  | \____/ |                              |
+|  |  o  o  |                              |
+|  |   ^^   |                              |
+|   \______/                               |
+|                                          |
+| Drift                                    |
+|                                          |
+| DEBUGGING  █████▓░░   69                 |
+| PATIENCE   ███▓░░░░   43                 |
+| CHAOS      ██▓░░░░░   31                 |
+| WISDOM     ███████░   88                 |
+| SNARK      █▓░░░░░░   19                 |
+|                                          |
+| Lv.3 · 4/28 XP to next                   |
+'__________________________________________'

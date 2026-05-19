@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Buddy Desktop - Final Plan Review</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: #121826;
+    color: #e6edf3;
+    line-height: 1.55;
+  }
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: #172033;
+    border-bottom: 1px solid #2b3a55;
+    padding: 14px 24px;
+  }
+  header h1 {
+    margin: 0;
+    font-size: 18px;
+    color: #7dd3fc;
+  }
+  header p {
+    margin: 4px 0 0;
+    color: #9fb0c3;
+    font-size: 13px;
+  }
+  main {
+    max-width: 1040px;
+    margin: 0 auto;
+    padding: 28px 24px 56px;
+  }
+  section {
+    background: #182235;
+    border: 1px solid #2b3a55;
+    border-radius: 8px;
+    padding: 20px;
+    margin: 18px 0;
+  }
+  h2 {
+    color: #bae6fd;
+    font-size: 17px;
+    margin: 0 0 12px;
+  }
+  h3 {
+    color: #d9f99d;
+    font-size: 14px;
+    margin: 18px 0 8px;
+  }
+  p, li {
+    color: #d1d9e0;
+    font-size: 14px;
+  }
+  ul, ol { padding-left: 22px; }
+  code {
+    background: #24324a;
+    color: #93c5fd;
+    border-radius: 4px;
+    padding: 2px 5px;
+    font-family: "SF Mono", Menlo, monospace;
+    font-size: 12px;
+  }
+  pre {
+    background: #0c1220;
+    border: 1px solid #263449;
+    border-radius: 8px;
+    color: #a7f3d0;
+    font-family: "SF Mono", Menlo, monospace;
+    font-size: 12px;
+    line-height: 1.45;
+    overflow-x: auto;
+    padding: 14px;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    font-size: 13px;
+  }
+  th {
+    background: #22304a;
+    color: #bfdbfe;
+    text-align: left;
+    padding: 9px 10px;
+    border-bottom: 1px solid #354765;
+  }
+  td {
+    border-bottom: 1px solid #263449;
+    padding: 9px 10px;
+    color: #d1d9e0;
+    vertical-align: top;
+  }
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 14px;
+  }
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    padding: 4px 10px;
+    background: #22304a;
+    color: #c7d2fe;
+    font-size: 12px;
+    border: 1px solid #354765;
+  }
+  .callout {
+    background: #102a1f;
+    border-color: #276749;
+  }
+  .warning {
+    background: #2a2110;
+    border-color: #7c5b20;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 14px;
+  }
+  .card {
+    background: #131d2e;
+    border: 1px solid #263449;
+    border-radius: 8px;
+    padding: 14px;
+  }
+  .card h3 { margin-top: 0; }
+  .phase-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .phase-num {
+    background: #0ea5e9;
+    color: #06101f;
+    border-radius: 999px;
+    min-width: 24px;
+    height: 24px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 12px;
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>Buddy Desktop - Final Plan Review</h1>
+  <p>Revised architecture: menu bar/tray first, TypeScript owns Buddy reuse, native shell owns windows and BLE.</p>
+  <div class="meta">
+    <span class="pill">Date: 2026-05-19</span>
+    <span class="pill">Status: Final plan for review</span>
+    <span class="pill">Supersedes old Plan A</span>
+  </div>
+</header>
+
+<main>
+  <section class="callout">
+    <h2>Executive Decision</h2>
+    <p>Proceed with Tauri only under a revised split: keep upstream Buddy integration in TypeScript/Node, and keep native desktop duties in Tauri/Rust or a small native helper. The default UX is a menu bar/tray app with a compact popup, so Buddy creates zero screen clutter when idle.</p>
+  </section>
+
+  <section>
+    <h2>UX Direction</h2>
+    <div class="grid">
+      <div class="card">
+        <h3>Default Surface</h3>
+        <p>Buddy lives in the macOS menu bar, or the system tray on Windows/Linux. Clicking the icon opens a compact status popup.</p>
+      </div>
+      <div class="card">
+        <h3>Idle Behavior</h3>
+        <p>No persistent desktop window by default. The app should feel present but quiet until something needs attention.</p>
+      </div>
+      <div class="card">
+        <h3>OpenHuman Inspiration</h3>
+        <p>Borrow the polished native-app feel and companion patterns from OpenHuman, but do not copy source code or assets.</p>
+      </div>
+      <div class="card">
+        <h3>Optional Mode</h3>
+        <p>A floating mascot window can be added later for users who want Buddy visible on the desktop.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Target Architecture</h2>
+    <pre>React UI
+  -&gt; menu bar/tray status popup
+  -&gt; Buddy mascot, stats, character display, permission overlay
+
+Tauri native shell
+  -&gt; app lifecycle, menu bar/tray icon, popup, optional transparent mascot window
+  -&gt; BLE peripheral integration or IPC to Swift/CoreBluetooth helper
+
+TypeScript Buddy bridge
+  -&gt; launches upstream Buddy
+  -&gt; speaks MCP stdio
+  -&gt; normalizes Buddy state
+  -&gt; exposes get_state, call_tool, subscribe_state
+
+Reference repos
+  -&gt; buddy/ unchanged
+  -&gt; claude-desktop-buddy/ unchanged
+  -&gt; openhuman inspiration only, no code copy</pre>
+  </section>
+
+  <section>
+    <h2>Why This Is Simpler</h2>
+    <table>
+      <tr><th>Concern</th><th>Old Plan</th><th>Final Plan</th></tr>
+      <tr><td>Buddy MCP</td><td>Rust client and parser</td><td>TypeScript bridge close to upstream</td></tr>
+      <tr><td>Buddy upstream changes</td><td>Rust code may drift</td><td>Small TS adapter changes</td></tr>
+      <tr><td>Desktop surface</td><td>Start with macOS NSPanel</td><td>Start with menu bar/tray popup, add floating panel later</td></tr>
+      <tr><td>BLE</td><td>Part of later app implementation</td><td>Standalone proof-of-life gate first</td></tr>
+      <tr><td>Interactive tools</td><td>Stubbed command</td><td>Bridge forwards real Buddy tool calls</td></tr>
+    </table>
+  </section>
+
+  <section>
+    <h2>Confirmed BLE Requirements</h2>
+    <div class="grid">
+      <div class="card">
+        <h3>Advertisement</h3>
+        <p>Act as a BLE peripheral. Device name must start with <code>Claude</code>. Advertise Nordic UART Service.</p>
+      </div>
+      <div class="card">
+        <h3>UUIDs</h3>
+        <p>Service: <code>6e400001-b5a3-f393-e0a9-e50e24dcca9e</code></p>
+        <p>RX: <code>6e400002-b5a3-f393-e0a9-e50e24dcca9e</code></p>
+        <p>TX: <code>6e400003-b5a3-f393-e0a9-e50e24dcca9e</code></p>
+      </div>
+      <div class="card">
+        <h3>Wire Format</h3>
+        <p>UTF-8 JSON, one object per line, newline terminated. Both sides reassemble fragmented BLE packets until <code>\n</code>.</p>
+      </div>
+      <div class="card">
+        <h3>Permissions</h3>
+        <p>When a prompt arrives, send <code>{"cmd":"permission","id":"...","decision":"once"}</code> or <code>deny</code>.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Implementation Phases</h2>
+    <h3 class="phase-title"><span class="phase-num">0</span> Repo And Protocol Grounding</h3>
+    <p>Keep <code>buddy/</code> and <code>claude-desktop-buddy/</code> as read-only references. Do not copy internals into the app.</p>
+
+    <h3 class="phase-title"><span class="phase-num">1</span> Buddy Bridge Proof Of Life</h3>
+    <p>Create <code>buddy-desktop/bridge</code>. Launch upstream Buddy, perform MCP handshake, call <code>buddy_status</code>, and return normalized JSON. Parser, if needed, lives only in TypeScript.</p>
+
+    <h3 class="phase-title"><span class="phase-num">2</span> Minimal Menu Bar / Tray App</h3>
+    <p>Scaffold Tauri + React. Tauri launches the TS bridge, creates a menu bar/tray icon, and opens a compact status popup on click.</p>
+
+    <h3 class="phase-title"><span class="phase-num">3</span> Optional Floating Window</h3>
+    <p>Add a user-controlled floating mascot mode only after the menu bar/tray flow works. Add macOS <code>NSPanel</code> only if the simpler frameless window is insufficient.</p>
+
+    <h3 class="phase-title"><span class="phase-num">4</span> BLE Peripheral Prototype</h3>
+    <p>Standalone BLE test: advertise <code>Claude-XXXX</code>, expose NUS RX/TX, receive heartbeat JSON, send status ack, and test permission response. Decide Rust <code>btleplug</code> vs Swift/CoreBluetooth helper here.</p>
+
+    <h3 class="phase-title"><span class="phase-num">5</span> BLE App Integration</h3>
+    <p>Merge Claude session state with Buddy state. Add approve/deny overlay and animation precedence.</p>
+
+    <h3 class="phase-title"><span class="phase-num">6</span> Character Packs</h3>
+    <p>Start with local GIF packs from <code>~/.buddy/characters</code>. Defer BLE folder push until local packs are working.</p>
+  </section>
+
+  <section>
+    <h2>First Execution Slice</h2>
+    <ol>
+      <li>Scaffold <code>buddy-desktop</code>.</li>
+      <li>Add TypeScript Buddy bridge.</li>
+      <li>Launch upstream Buddy unchanged.</li>
+      <li>Call <code>buddy_status</code>.</li>
+      <li>Render normalized Buddy state in a menu bar/tray popup.</li>
+      <li>Add tests around the Buddy state mapper.</li>
+    </ol>
+    <p>Exit criteria: a menu bar/tray icon appears; clicking it shows Buddy name, level, XP, species, and stats; upstream Buddy remains unchanged; no Rust MCP parser exists.</p>
+  </section>
+
+  <section class="warning">
+    <h2>Decision Gates</h2>
+    <ul>
+      <li>Do not start BLE integration until the standalone BLE peripheral prototype connects to Claude Desktop.</li>
+      <li>Do not implement <code>NSPanel</code> until the menu bar/tray popup and simpler floating window work.</li>
+      <li>Do not implement BLE folder push until local character packs work.</li>
+      <li>Do not add Buddy behavior to Rust; route Buddy tools through the TypeScript bridge.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Review Links</h2>
+    <ul>
+      <li>Final Markdown plan: <code>docs/superpowers/plans/2026-05-19-buddy-desktop-final-plan.md</code></li>
+      <li>Old Plan A: <code>docs/superpowers/plans/2026-05-18-buddy-desktop-plan-a-mcp-sidecar.md</code></li>
+      <li>BLE reference: <code>claude-desktop-buddy/REFERENCE.md</code></li>
+      <li>OpenHuman inspiration: <code>https://github.com/tinyhumansai/openhuman</code></li>
+    </ul>
+  </section>
+</main>
+</body>
+</html>
