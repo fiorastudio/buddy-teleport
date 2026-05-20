@@ -65,6 +65,7 @@ The React frontend in `buddy-desktop/src/` renders `BuddyMascot` when `?window=m
 - **BLE companion protocol**: implementation and permission prompt paths exist, but real Claude Desktop pairing remains a manual verification gate.
 
 See `docs/superpowers/plans/2026-05-20-buddy-desktop-completion-audit.md` for the current requirement-by-requirement verification state.
+For the remaining native GUI and Claude Desktop BLE gates, use `docs/superpowers/plans/2026-05-20-buddy-desktop-manual-verification.md`.
 
 ## Working in buddy-desktop (Tauri v2)
 

@@ -56,10 +56,12 @@
 
 ## Remaining Gates
 
-- Native GUI automation is blocked in this host: `cua-driver status` and `cua-driver check_permissions '{"prompt":false}'` both fail because `/Applications/CuaDriver.app/Contents/MacOS/cua-driver` was built for macOS 14 and cannot load `/usr/lib/swift/libswiftObservation.dylib` on this OS.
+- Native GUI automation is blocked on this host as of 2026-05-20: `cua-driver status` and `cua-driver check_permissions '{"prompt":false}'` both fail because `/Applications/CuaDriver.app/Contents/MacOS/cua-driver` was built for macOS 14 and cannot load `/usr/lib/swift/libswiftObservation.dylib` on this OS.
 - Because native GUI automation is unavailable, direct click verification of popup **Pet**, **Observe**, **Return**, and tray/menu-bar behavior remains manual/environment-gated; source/config invariants for tray target selection are covered.
 - Browser screenshot automation for the Tauri webview remains unavailable through the required in-app browser Node REPL tool in this session.
 - Claude Desktop BLE pairing and real Hardware Buddy permission flow still require manual pairing with Claude Desktop; protocol parsing, fake peripheral behavior, and permission frame serialization are covered by automated tests.
+
+The exact human verification steps and pass/fail evidence requirements are documented in `docs/superpowers/plans/2026-05-20-buddy-desktop-manual-verification.md`.
 
 ## Audit Conclusion
 
