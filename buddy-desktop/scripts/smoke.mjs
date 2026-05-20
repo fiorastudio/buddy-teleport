@@ -39,6 +39,15 @@ const teleportCommand = await readFile(new URL(".claude/commands/buddy-teleport.
 if (!teleportCommand.includes("./scripts/buddy-teleport-out.sh")) {
   throw new Error("Claude teleport command must invoke the repo-relative teleport launcher");
 }
+for (const requiredSnippet of [
+  "**Return**",
+  "buddy_observe",
+  "terminal `buddy_status`",
+]) {
+  if (!teleportCommand.includes(requiredSnippet)) {
+    throw new Error(`Claude teleport command must document the return-to-terminal contract: ${requiredSnippet}`);
+  }
+}
 if (teleportCommand.includes("/Users/")) {
   throw new Error("Claude teleport command must not hard-code a machine-specific checkout path");
 }
