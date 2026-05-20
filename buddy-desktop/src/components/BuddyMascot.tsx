@@ -4,8 +4,12 @@ import { invoke } from "@tauri-apps/api/core";
 import type { MascotState } from "../types/state";
 import { BuddyStats } from "./BuddyStats";
 import { CharacterDisplay } from "./CharacterDisplay";
-import { DEFAULT_BUDDY_STATE, DEFAULT_MASCOT_STATE } from "../types/state";
-import { connectionFromBuddyPayload } from "../utils/appState.mjs";
+import { DEFAULT_MASCOT_STATE } from "../types/state";
+import {
+  stateFromMascotEvent,
+  stateWithInitialBuddy,
+  stateWithReturnedBuddy,
+} from "../utils/appState.mjs";
 
 export function BuddyMascot() {
   const [state, setState] = useState<MascotState>(DEFAULT_MASCOT_STATE);
@@ -18,14 +22,7 @@ export function BuddyMascot() {
 
     async function setupListeners() {
       unlistenMascot = await listen<MascotState>("mascot-state-updated", (event) => {
-        setState({
-          ...DEFAULT_MASCOT_STATE,
-          ...event.payload,
-          buddy: {
-            ...DEFAULT_BUDDY_STATE,
-            ...(event.payload?.buddy || {}),
-          },
-        });
+        setState(stateFromMascotEvent(event.payload));
         setOffline(false);
       });
       unlistenOffline = await listen("buddy-offline", () => {
@@ -33,33 +30,18 @@ export function BuddyMascot() {
       });
 
       unlistenTeleportedBack = await listen<any>("buddy-teleported-back", (event) => {
-        setState((current) => ({
-          ...current,
-          ...event.payload,
-          buddy: {
-            ...DEFAULT_BUDDY_STATE,
-            ...(event.payload?.buddy || current.buddy),
-          },
-          connection: "offline",
-          animationState: "sleep",
-        }));
+        setState((current) => stateWithReturnedBuddy(current, event.payload));
         setOffline(true);
       });
 
       try {
         const initialState = await invoke<any>("buddy_get_state");
         if (initialState) {
-          const connection = connectionFromBuddyPayload(initialState);
-          setState((current) => ({
-            ...current,
-            buddy: {
-              ...DEFAULT_BUDDY_STATE,
-              ...initialState,
-            },
-            connection,
-            animationState: connection === "online" ? "idle" : "sleep",
-          }));
-          setOffline(connection === "offline");
+          setState((current) => {
+            const nextState = stateWithInitialBuddy(current, initialState);
+            setOffline(nextState.connection === "offline");
+            return nextState;
+          });
         }
       } catch (e) {
         console.error("Failed to fetch initial buddy mascot state", e);

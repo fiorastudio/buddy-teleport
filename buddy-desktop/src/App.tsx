@@ -2,10 +2,14 @@ import { useEffect, useState } from "react";
 import { listen } from "@tauri-apps/api/event";
 import { invoke } from "@tauri-apps/api/core";
 import { StatusPopup } from "./components/StatusPopup";
-import { connectionFromBuddyPayload } from "./utils/appState.mjs";
+import {
+  stateFromMascotEvent,
+  stateWithInitialBuddy,
+  stateWithRefreshedBuddy,
+  stateWithReturnedBuddy,
+} from "./utils/appState.mjs";
 import { buildPermissionDecision } from "./utils/permission.mjs";
 import {
-  DEFAULT_BUDDY_STATE,
   DEFAULT_MASCOT_STATE,
   type MascotState,
 } from "./types/state";
@@ -21,14 +25,7 @@ export function App() {
 
     async function setupListeners() {
       unlistenMascot = await listen<any>("mascot-state-updated", (event) => {
-        setState({
-          ...DEFAULT_MASCOT_STATE,
-          ...event.payload,
-          buddy: {
-            ...DEFAULT_BUDDY_STATE,
-            ...(event.payload?.buddy || {}),
-          },
-        });
+        setState(stateFromMascotEvent(event.payload));
         setPermissionError(null);
       });
 
@@ -42,28 +39,14 @@ export function App() {
       });
 
       unlistenTeleportedBack = await listen<any>("buddy-teleported-back", (event) => {
-        setState((current) => ({
-          ...current,
-          ...event.payload,
-          buddy: {
-            ...DEFAULT_BUDDY_STATE,
-            ...(event.payload?.buddy || current.buddy),
-          },
-        }));
+        setState((current) => stateWithReturnedBuddy(current, event.payload));
       });
       
       // Fetch initial state
       try {
         const initialState = await invoke<any>("buddy_get_state");
         if (initialState) {
-          setState((current) => ({
-            ...current,
-            buddy: {
-              ...DEFAULT_BUDDY_STATE,
-              ...initialState,
-            },
-            connection: connectionFromBuddyPayload(initialState),
-          }));
+          setState((current) => stateWithInitialBuddy(current, initialState));
         }
       } catch (e) {
         console.error("Failed to fetch initial state", e);
@@ -81,16 +64,7 @@ export function App() {
 
   async function refreshBuddyState(animationState: MascotState["animationState"] = "idle") {
     const refreshedBuddy = await invoke<any>("buddy_get_state");
-    setState((current) => ({
-      ...current,
-      buddy: {
-        ...DEFAULT_BUDDY_STATE,
-        ...refreshedBuddy,
-      },
-      connection: connectionFromBuddyPayload(refreshedBuddy, "online"),
-      animationState,
-      errorMessage: null,
-    }));
+    setState((current) => stateWithRefreshedBuddy(current, refreshedBuddy, animationState));
   }
 
   async function handlePetBuddy() {
@@ -139,16 +113,9 @@ export function App() {
   async function handleTeleportBack() {
     try {
       const returnedBuddy = await invoke<any>("buddy_teleport_back");
-      setState((current) => ({
-        ...current,
-        buddy: {
-          ...DEFAULT_BUDDY_STATE,
-          ...returnedBuddy,
-        },
-        connection: "offline",
-        animationState: "sleep",
-        errorMessage: "Buddy returned to terminal.",
-      }));
+      setState((current) =>
+        stateWithReturnedBuddy(current, returnedBuddy, "Buddy returned to terminal."),
+      );
       setPermissionError(null);
     } catch (error) {
       setPermissionError(error instanceof Error ? error.message : String(error));

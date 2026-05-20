@@ -113,7 +113,8 @@ for (const requiredSnippet of [
   'name: "buddy_pet"',
   'name: "buddy_observe"',
   'invoke<any>("buddy_teleport_back")',
-  "connectionFromBuddyPayload(initialState)",
+  "stateWithInitialBuddy(current, initialState)",
+  "stateWithReturnedBuddy(current, returnedBuddy",
 ]) {
   if (!appSource.includes(requiredSnippet)) {
     throw new Error(`App action/state wiring missing expected snippet: ${requiredSnippet}`);
@@ -143,7 +144,8 @@ if (mascotSource.includes("MOCK_MASCOT_STATE")) {
 for (const requiredSnippet of [
   'invoke<any>("buddy_get_state")',
   'listen<any>("buddy-teleported-back"',
-  "connectionFromBuddyPayload(initialState)",
+  "stateWithInitialBuddy(current, initialState)",
+  "stateWithReturnedBuddy(current, event.payload)",
 ]) {
   if (!mascotSource.includes(requiredSnippet)) {
     throw new Error(`BuddyMascot terminal-state wiring missing expected snippet: ${requiredSnippet}`);
