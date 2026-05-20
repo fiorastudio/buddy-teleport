@@ -1,0 +1,54 @@
+# Buddy Desktop Completion Audit
+
+**Date:** 2026-05-20  
+**Scope:** Active user goal for terminal Buddy teleport into Buddy Desktop/Tauri, desktop return to terminal, Buddy tool actions, identity/body preservation, and repository check-in.
+
+## Current Repository State
+
+- Branch `main` is clean and tracking `origin/main`.
+- Latest pushed commit at audit time: `bd79fe3 fix: make teleport command repo-relative`.
+- Relevant follow-up commits reviewed/pushed in this pass:
+  - `5a29444 fix: launch installed buddy in debug app`
+  - `f3473ea fix: avoid mock buddy during startup`
+  - `795d8b8 fix: keep startup connection offline until buddy arrives`
+  - `4d72972 test: add live teleport tool smoke`
+  - `b0cbf04 test: cover teleport back command path`
+  - `bd79fe3 fix: make teleport command repo-relative`
+
+## Requirement Audit
+
+| Requirement | Current Evidence | Status |
+| --- | --- | --- |
+| Terminal user can invoke teleport-out via a slash-command-like entrypoint | `.claude/commands/buddy-teleport.md` invokes `./scripts/buddy-teleport-out.sh`; `buddy-desktop/scripts/smoke.mjs` fails if it regresses to a machine-specific `/Users/...` path. | Proven by source and smoke test |
+| Teleport launcher uses the terminal Buddy install and DB, not a desktop-only Buddy | `scripts/buddy-teleport-out.sh` defaults to `$HOME/.buddy/server`, prints `BUDDY_DB_PATH`/`$HOME/.buddy/buddy.db`, creates a `BUDDY_SIDECAR_PATH` wrapper, and exports `BUDDY_WORKSPACE_CWD`. | Proven by source and live smoke |
+| Plain debug launch does not fail with a missing packaged sidecar | `resolve_buddy_sidecar_path` falls back to the installed Buddy MCP entry in debug when no packaged sidecar exists; `.js` MCP entries spawn through `node`. | Proven by `cargo test` and observed `cargo run` startup |
+| Tauri app uses the correct terminal Buddy body/identity rather than random mock bodies | React starts from `DEFAULT_MASCOT_STATE`, not `MOCK_MASCOT_STATE`; runtime polling parses the seeded terminal Buddy (`TeleportSmoke`) in `npm run smoke:teleport-runtime`; sprite frames preserve parsed ASCII body lines. | Proven by source, unit tests, and runtime smoke |
+| Status, XP graph, name, species/rarity, personality, stats, and sprite body are preserved into React state | Rust parser extracts identity, XP, stats, personality, and sprite-only `ascii_art`; `frontend_buddy_payload` preserves them as camelCase; React renders identity, XP bar, stats, and sprite frames. | Proven by Rust/frontend tests |
+| Pet and Observe actions use the real Buddy sidecar path and refresh identity | `buddy_tool` calls `call_buddy_tool_once` with the cached sidecar path; `npm run smoke:teleport-tools` hatches `TeleportAda`, runs `buddy_pet` and `buddy_observe` through the Rust command helper, and verifies identity remains `TeleportAda` / `ROBOT`. | Proven by live smoke |
+| Observe path preserves guard-mode defaults and workspace cwd | `normalize_buddy_tool_args` adds `claims`, `edges`, and `cwd`; `scripts/buddy-teleport-out.sh` exports `BUDDY_WORKSPACE_CWD`. | Proven by Rust tests |
+| Desktop Return action teleports Buddy back to terminal state | `buddy_teleport_back` uses `teleport_back_once`, records `buddy_observe`, marks state offline, emits `buddy-teleported-back`, and disables polling. Live smoke verifies identity remains `TeleportAda` / `ROBOT` and payload mood is `sleeping`. | Proven by Rust tests and live smoke |
+| Work is checked into repository | Latest work is committed and pushed to `origin/main`. | Proven by `git status --short --branch` and push results |
+
+## Verification Commands Passed
+
+- `npm test` from `buddy-desktop`
+- `npm run build` from `buddy-desktop`
+- `cargo test` from `buddy-desktop/src-tauri`
+- `npm run docs:check` from workspace root
+- `npm run smoke:teleport-tools` from workspace root
+- `npm run smoke:teleport-runtime` from workspace root
+- `git diff --check` from workspace root
+- Plain `cargo run` from `buddy-desktop/src-tauri` started `target/debug/buddy-desktop` and spawned `node $HOME/.buddy/server/dist/server/index.js` without the previous missing-sidecar retry loop.
+
+## Remaining Gates
+
+- Native GUI automation is blocked in this host: `cua-driver status` and `cua-driver check_permissions '{"prompt":false}'` both fail because `/Applications/CuaDriver.app/Contents/MacOS/cua-driver` was built for macOS 14 and cannot load `/usr/lib/swift/libswiftObservation.dylib` on this OS.
+- Because native GUI automation is unavailable, direct click verification of popup **Pet**, **Observe**, **Return**, and tray/menu-bar behavior remains manual/environment-gated.
+- Browser screenshot automation for the Tauri webview remains unavailable through the required in-app browser Node REPL tool in this session.
+- Claude Desktop BLE pairing and real Hardware Buddy permission flow still require manual pairing with Claude Desktop; protocol parsing, fake peripheral behavior, and permission frame serialization are covered by automated tests.
+
+## Audit Conclusion
+
+The terminal-to-desktop and desktop-to-terminal Buddy teleport logic is now strongly covered by source review, unit tests, isolated live Buddy smokes, and bounded native runtime smokes. The specific concern about wrong/random bodies is addressed by removing mock startup state, deriving connection from Buddy payload mood, and verifying live runtime parsing against seeded terminal Buddy DBs.
+
+The goal should remain open until the environment supports native GUI/tray automation or a human manually verifies the popup and tray surfaces, plus real Claude Desktop BLE pairing.
