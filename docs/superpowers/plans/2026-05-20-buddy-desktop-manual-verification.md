@@ -20,6 +20,14 @@ Use this checklist on a macOS host where native GUI automation and Claude Deskto
    ./scripts/buddy-teleport-out.sh
    ```
 
+Optional host preflight:
+
+```bash
+npm run check:manual-gates
+```
+
+This reports whether the installed Buddy MCP entry exists and whether native GUI automation is available on the current host. A blocked native automation result means the checklist can still be completed manually, but it cannot be automated with `cua-driver` on that host.
+
 ## Terminal Buddy Identity
 
 Pass criteria:

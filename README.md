@@ -109,6 +109,14 @@ npm run smoke:teleport-tools
 npm run smoke:teleport-runtime
 ```
 
+Manual GUI/BLE preflight:
+
+```bash
+npm run check:manual-gates
+```
+
+This reports whether the installed terminal Buddy entry exists and whether native GUI automation is available for the tray/popup checks. It does not replace the manual verification checklist for GUI and real Claude Desktop BLE behavior.
+
 ## Implementation Status
 
 - [x] **M0 - Grounding**: Workspace and references established.

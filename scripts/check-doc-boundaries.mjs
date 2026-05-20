@@ -33,6 +33,7 @@ const checks = [
     file: "README.md",
     required: [
       "npm run verify:automated",
+      "npm run check:manual-gates",
       "Buddy Teleport must not hatch a random desktop-only Buddy.",
       "./scripts/buddy-teleport-out.sh",
     ],
@@ -50,6 +51,7 @@ const checks = [
     file: "docs/superpowers/plans/2026-05-20-buddy-desktop-manual-verification.md",
     required: [
       "Terminal Buddy Identity",
+      "npm run check:manual-gates",
       "Popup Actions",
       "Return To Terminal",
       "Tray/Menu Bar",
