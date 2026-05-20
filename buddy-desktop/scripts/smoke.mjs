@@ -105,6 +105,9 @@ const appSource = await readFile(new URL("src/App.tsx", root), "utf8");
 if (!appSource.includes("useState<MascotState>(DEFAULT_MASCOT_STATE)")) {
   throw new Error("App must start from the offline default state until terminal Buddy state arrives");
 }
+if (appSource.includes("MOCK_MASCOT_STATE")) {
+  throw new Error("App must not import or render a mock Buddy body");
+}
 
 for (const requiredSnippet of [
   'name: "buddy_pet"',
@@ -118,6 +121,9 @@ for (const requiredSnippet of [
 }
 
 const statusPopupSource = await readFile(new URL("src/components/StatusPopup.tsx", root), "utf8");
+if (statusPopupSource.includes("MOCK_MASCOT_STATE")) {
+  throw new Error("StatusPopup must not export or render a mock Buddy body");
+}
 for (const requiredSnippet of ["onPetBuddy", "onObserveBuddy", "onTeleportBack"]) {
   if (!statusPopupSource.includes(requiredSnippet)) {
     throw new Error(`StatusPopup action control missing expected snippet: ${requiredSnippet}`);
@@ -131,6 +137,9 @@ for (const label of ["Pet", "Observe", "Return"]) {
 }
 
 const mascotSource = await readFile(new URL("src/components/BuddyMascot.tsx", root), "utf8");
+if (mascotSource.includes("MOCK_MASCOT_STATE")) {
+  throw new Error("BuddyMascot must not import or render a mock Buddy body");
+}
 for (const requiredSnippet of [
   'invoke<any>("buddy_get_state")',
   'listen<any>("buddy-teleported-back"',
@@ -139,6 +148,11 @@ for (const requiredSnippet of [
   if (!mascotSource.includes(requiredSnippet)) {
     throw new Error(`BuddyMascot terminal-state wiring missing expected snippet: ${requiredSnippet}`);
   }
+}
+
+const stateTypesSource = await readFile(new URL("src/types/state.ts", root), "utf8");
+if (stateTypesSource.includes("MOCK_MASCOT_STATE") || stateTypesSource.includes("mock-buddy")) {
+  throw new Error("Production state types must not define a mock Buddy body");
 }
 
 console.log("smoke prerequisites passed");

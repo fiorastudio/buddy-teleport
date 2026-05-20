@@ -3,7 +3,6 @@ import { CharacterDisplay } from "./CharacterDisplay";
 import { ApproveOverlay } from "./ApproveOverlay";
 import {
   DEFAULT_MASCOT_STATE,
-  MOCK_MASCOT_STATE,
   type MascotState,
 } from "../types/state";
 import { buildStatusPopupViewModel } from "../utils/statusPopupViewModel.mjs";
@@ -113,7 +112,7 @@ export function StatusPopup({
   );
 }
 
-export { DEFAULT_MASCOT_STATE, MOCK_MASCOT_STATE };
+export { DEFAULT_MASCOT_STATE };
 
 const badgeBase = {
   borderRadius: 999,

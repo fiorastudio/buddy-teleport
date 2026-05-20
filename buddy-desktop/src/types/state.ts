@@ -99,31 +99,3 @@ export const DEFAULT_MASCOT_STATE: MascotState = {
   claudeSession: null,
   errorMessage: null,
 };
-
-export const MOCK_MASCOT_STATE: MascotState = {
-  connection: "online",
-  animationState: "idle",
-  buddy: {
-    id: "mock-buddy",
-    name: "Bufo",
-    species: "debug frog",
-    rarity: "rare",
-    level: 7,
-    xp: 420,
-    xpToNext: 600,
-    stats: {
-      debugging: 82,
-      patience: 66,
-      chaos: 31,
-      wisdom: 74,
-      snark: 18,
-    },
-    personality: "Curious, steady, and quietly observant.",
-    mood: "focused",
-    asciiArt: ["  @..@  ", " (----) ", "( >__< )", "^^ ~~ ^^"],
-    lastReaction: "Watching the session for useful context.",
-    updatedAt: "2026-05-19T00:00:00.000Z",
-  },
-  claudeSession: null,
-  errorMessage: null,
-};
