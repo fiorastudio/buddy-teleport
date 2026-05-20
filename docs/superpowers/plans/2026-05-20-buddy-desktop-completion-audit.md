@@ -27,6 +27,7 @@
 | Pet and Observe actions use the real Buddy sidecar path and refresh identity | `buddy_tool` calls `call_buddy_tool_once` with the cached sidecar path; `npm run smoke:teleport-tools` hatches `TeleportAda`, runs `buddy_pet` and `buddy_observe` through the Rust command helper, and verifies identity remains `TeleportAda` / `ROBOT`. | Proven by live smoke |
 | Observe path preserves guard-mode defaults and workspace cwd | `normalize_buddy_tool_args` adds `claims`, `edges`, and `cwd`; `scripts/buddy-teleport-out.sh` exports `BUDDY_WORKSPACE_CWD`. | Proven by Rust tests |
 | Desktop Return action teleports Buddy back to terminal state | `buddy_teleport_back` uses `teleport_back_once`, records `buddy_observe`, marks state offline, emits `buddy-teleported-back`, and disables polling. Live smoke verifies identity remains `TeleportAda` / `ROBOT` and payload mood is `sleeping`. | Proven by Rust tests and live smoke |
+| Tray click targets the popup window rather than the mascot surface | Tray constants target `status-popup`; `tauri.conf.json` defines `status-popup` hidden by default; mascot window uses a distinct `mascot` label and `window=mascot&companion=buddy` route. | Proven by Rust and frontend smoke tests |
 | Work is checked into repository | Latest work is committed and pushed to `origin/main`. | Proven by `git status --short --branch` and push results |
 
 ## Verification Commands Passed
@@ -43,7 +44,7 @@
 ## Remaining Gates
 
 - Native GUI automation is blocked in this host: `cua-driver status` and `cua-driver check_permissions '{"prompt":false}'` both fail because `/Applications/CuaDriver.app/Contents/MacOS/cua-driver` was built for macOS 14 and cannot load `/usr/lib/swift/libswiftObservation.dylib` on this OS.
-- Because native GUI automation is unavailable, direct click verification of popup **Pet**, **Observe**, **Return**, and tray/menu-bar behavior remains manual/environment-gated.
+- Because native GUI automation is unavailable, direct click verification of popup **Pet**, **Observe**, **Return**, and tray/menu-bar behavior remains manual/environment-gated; source/config invariants for tray target selection are covered.
 - Browser screenshot automation for the Tauri webview remains unavailable through the required in-app browser Node REPL tool in this session.
 - Claude Desktop BLE pairing and real Hardware Buddy permission flow still require manual pairing with Claude Desktop; protocol parsing, fake peripheral behavior, and permission frame serialization are covered by automated tests.
 

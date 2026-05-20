@@ -48,6 +48,15 @@ if (!teleportLauncher.includes('BUDDY_SERVER_DIR="${BUDDY_SERVER_DIR:-$HOME/.bud
   throw new Error("teleport launcher must default to the current user's Buddy install under $HOME");
 }
 
+const tauriConfig = JSON.parse(await readFile(new URL("src-tauri/tauri.conf.json", root), "utf8"));
+const statusPopupWindow = tauriConfig.app?.windows?.find((window) => window.label === "status-popup");
+if (!statusPopupWindow) {
+  throw new Error("Tauri config must define the status-popup window targeted by the tray");
+}
+if (statusPopupWindow.visible !== false) {
+  throw new Error("status-popup should start hidden until the tray opens it");
+}
+
 const appSource = await readFile(new URL("src/App.tsx", root), "utf8");
 if (!appSource.includes("useState<MascotState>(DEFAULT_MASCOT_STATE)")) {
   throw new Error("App must start from the offline default state until terminal Buddy state arrives");
