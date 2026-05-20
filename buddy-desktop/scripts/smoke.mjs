@@ -130,4 +130,15 @@ for (const label of ["Pet", "Observe", "Return"]) {
   }
 }
 
+const mascotSource = await readFile(new URL("src/components/BuddyMascot.tsx", root), "utf8");
+for (const requiredSnippet of [
+  'invoke<any>("buddy_get_state")',
+  'listen<any>("buddy-teleported-back"',
+  "connectionFromBuddyPayload(initialState)",
+]) {
+  if (!mascotSource.includes(requiredSnippet)) {
+    throw new Error(`BuddyMascot terminal-state wiring missing expected snippet: ${requiredSnippet}`);
+  }
+}
+
 console.log("smoke prerequisites passed");

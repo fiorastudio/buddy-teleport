@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { listen } from "@tauri-apps/api/event";
+import { invoke } from "@tauri-apps/api/core";
 import type { MascotState } from "../types/state";
 import { BuddyStats } from "./BuddyStats";
 import { CharacterDisplay } from "./CharacterDisplay";
 import { DEFAULT_BUDDY_STATE, DEFAULT_MASCOT_STATE } from "../types/state";
+import { connectionFromBuddyPayload } from "../utils/appState.mjs";
 
 export function BuddyMascot() {
   const [state, setState] = useState<MascotState>(DEFAULT_MASCOT_STATE);
@@ -12,6 +14,7 @@ export function BuddyMascot() {
   useEffect(() => {
     let unlistenMascot: (() => void) | undefined;
     let unlistenOffline: (() => void) | undefined;
+    let unlistenTeleportedBack: (() => void) | undefined;
 
     async function setupListeners() {
       unlistenMascot = await listen<MascotState>("mascot-state-updated", (event) => {
@@ -28,6 +31,39 @@ export function BuddyMascot() {
       unlistenOffline = await listen("buddy-offline", () => {
         setOffline(true);
       });
+
+      unlistenTeleportedBack = await listen<any>("buddy-teleported-back", (event) => {
+        setState((current) => ({
+          ...current,
+          ...event.payload,
+          buddy: {
+            ...DEFAULT_BUDDY_STATE,
+            ...(event.payload?.buddy || current.buddy),
+          },
+          connection: "offline",
+          animationState: "sleep",
+        }));
+        setOffline(true);
+      });
+
+      try {
+        const initialState = await invoke<any>("buddy_get_state");
+        if (initialState) {
+          const connection = connectionFromBuddyPayload(initialState);
+          setState((current) => ({
+            ...current,
+            buddy: {
+              ...DEFAULT_BUDDY_STATE,
+              ...initialState,
+            },
+            connection,
+            animationState: connection === "online" ? "idle" : "sleep",
+          }));
+          setOffline(connection === "offline");
+        }
+      } catch (e) {
+        console.error("Failed to fetch initial buddy mascot state", e);
+      }
     }
 
     setupListeners();
@@ -35,6 +71,7 @@ export function BuddyMascot() {
     return () => {
       if (unlistenMascot) unlistenMascot();
       if (unlistenOffline) unlistenOffline();
+      if (unlistenTeleportedBack) unlistenTeleportedBack();
     };
   }, []);
 
