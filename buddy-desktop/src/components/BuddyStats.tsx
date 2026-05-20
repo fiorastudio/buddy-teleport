@@ -1,81 +1,55 @@
-import type { BuddyState, BuddyStats as BuddyStatsShape } from "../types/state";
-
-const STAT_KEYS: (keyof BuddyStatsShape)[] = [
-  "debugging",
-  "patience",
-  "chaos",
-  "wisdom",
-  "snark",
-];
-
-const MAX_STAT = 100;
-
-function clampPercent(value: number, total: number): number {
-  if (!Number.isFinite(total) || total <= 0) {
-    return 0;
-  }
-
-  return Math.min(Math.max((value / total) * 100, 0), 100);
-}
-
-function statLabel(key: string): string {
-  return key[0].toUpperCase() + key.slice(1);
-}
+import type { BuddyState } from "../types/state";
+import type { BuddyStatRow } from "../utils/buddyIdentityView.mjs";
+import { buildBuddyIdentityView } from "../utils/buddyIdentityView.mjs";
 
 export interface BuddyStatsProps {
   buddy: BuddyState;
 }
 
 export function BuddyStats({ buddy }: BuddyStatsProps) {
-  const xpPercent = clampPercent(buddy.xp, buddy.xpToNext);
+  const view = buildBuddyIdentityView(buddy);
 
   return (
     <section style={styles.root} aria-label="Buddy stats">
       <div style={styles.identityRow}>
         <div style={styles.identityText}>
-          <strong style={styles.name} title={buddy.name}>
-            {buddy.name}
+          <strong style={styles.name} title={view.name}>
+            {view.name}
           </strong>
-          <span style={styles.meta} title={`${buddy.rarity} ${buddy.species}`}>
-            {buddy.rarity} {buddy.species}
+          <span style={styles.meta} title={view.meta}>
+            {view.meta}
           </span>
         </div>
-        <span style={styles.level}>Lv. {buddy.level}</span>
+        <span style={styles.level}>{view.levelLabel}</span>
       </div>
 
-      <div style={styles.xpBlock} aria-label={`XP ${buddy.xp} of ${buddy.xpToNext}`}>
+      <div style={styles.xpBlock} aria-label={view.xpAriaLabel}>
         <div style={styles.xpText}>
           <span>XP</span>
-          <span>
-            {buddy.xp}/{buddy.xpToNext}
-          </span>
+          <span>{view.xpLabel}</span>
         </div>
         <div style={styles.track}>
-          <div style={{ ...styles.fill, width: `${xpPercent}%` }} />
+          <div style={{ ...styles.fill, width: `${view.xpPercent}%` }} />
         </div>
       </div>
 
       <div style={styles.statsGrid}>
-        {STAT_KEYS.map((key) => {
-          const value = Math.min(Math.max(Number(buddy.stats[key] ?? 0), 0), MAX_STAT);
-
-          return (
-            <div key={key} style={styles.statRow}>
-              <span style={styles.statName}>{statLabel(key)}</span>
-              <div style={styles.statTrack} aria-hidden="true">
-                <div style={{ ...styles.statFill, width: `${value}%` }} />
-              </div>
-              <span style={styles.statValue}>{value}</span>
+        {view.stats.map((stat: BuddyStatRow) => (
+          <div key={stat.key} style={styles.statRow}>
+            <span style={styles.statName}>{stat.label}</span>
+            <div style={styles.statTrack} aria-hidden="true">
+              <div style={{ ...styles.statFill, width: `${stat.value}%` }} />
             </div>
-          );
-        })}
+            <span style={styles.statValue}>{stat.value}</span>
+          </div>
+        ))}
       </div>
 
-      {buddy.lastReaction ? (
+      {view.reaction ? (
         <div style={styles.reaction} aria-label="Latest Buddy reaction">
           <span style={styles.reactionLabel}>Latest reaction</span>
-          <p style={styles.reactionText} title={buddy.lastReaction}>
-            {buddy.lastReaction}
+          <p style={styles.reactionText} title={view.reaction}>
+            {view.reaction}
           </p>
         </div>
       ) : null}

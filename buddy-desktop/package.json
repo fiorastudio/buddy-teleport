@@ -9,6 +9,7 @@
     "check:scaffold": "node scripts/check-scaffold.mjs",
     "smoke": "node scripts/smoke.mjs",
     "smoke:installed-buddy": "node scripts/smoke-installed-buddy.mjs",
+    "typecheck": "tsc --noEmit",
     "test": "node --test \"src/**/*.test.mjs\" \"ble-prototype/**/*.test.js\" && npm --prefix bridge test && npm run check:scaffold && npm run smoke",
     "tauri:dev": "tauri dev"
   },

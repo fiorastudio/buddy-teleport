@@ -1,5 +1,6 @@
 import type { AnimationState, BuddyState, ConnectionState } from "../types/state";
-import { buddySpriteFrames, buddyVisualModel } from "../utils/stateHelpers.mjs";
+import { buildBuddyIdentityView } from "../utils/buddyIdentityView.mjs";
+import { buddyVisualModel } from "../utils/stateHelpers.mjs";
 
 export interface CharacterDisplayProps {
   buddy: BuddyState;
@@ -14,7 +15,7 @@ export function CharacterDisplay({
 }: CharacterDisplayProps) {
   const isOffline = connection === "offline";
   const visual = buddyVisualModel(buddy, connection, animationState);
-  const spriteFrames = buddySpriteFrames(buddy.asciiArt);
+  const identityView = buildBuddyIdentityView(buddy);
 
   return (
     <section style={styles.root} aria-label="Character display">
@@ -28,9 +29,9 @@ export function CharacterDisplay({
         data-animation-state={animationState}
       >
         <div style={{ ...styles.orbit, borderColor: visual.accent }} aria-hidden="true" />
-        {spriteFrames.length > 0 ? (
+        {identityView.spriteFrames.length > 0 ? (
           <div className="buddy-sprite" style={{ ...styles.sprite, color: visual.accent }}>
-            {spriteFrames.map((frame, index) => (
+            {identityView.spriteFrames.map((frame, index) => (
               <pre
                 key={index}
                 className="buddy-sprite-frame"
@@ -55,10 +56,10 @@ export function CharacterDisplay({
 
       <div style={styles.traitRow}>
         <span style={{ ...styles.traitPill, borderColor: visual.accent, color: visual.accent }}>
-          {visual.topStat.label}
+          {identityView.topStat.label}
         </span>
-        <span style={styles.traitText} title={`${buddy.rarity} ${buddy.species}`}>
-          {buddy.rarity} {buddy.species}
+        <span style={styles.traitText} title={identityView.meta}>
+          {identityView.meta}
         </span>
       </div>
 

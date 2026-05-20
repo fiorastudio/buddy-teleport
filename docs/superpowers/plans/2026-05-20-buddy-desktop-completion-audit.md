@@ -6,7 +6,7 @@
 ## Current Repository State
 
 - Branch `main` is tracking `origin/main`.
-- Latest pushed commit before this documentation refresh: `53f18df fix: normalize BLE permission prompt ids`.
+- Latest pushed commit before this React identity-surface verification pass: `1967819 docs: refresh teleport usage guidance`.
 - Relevant follow-up commits reviewed/pushed in this pass:
   - `5a29444 fix: launch installed buddy in debug app`
   - `f3473ea fix: avoid mock buddy during startup`
@@ -17,6 +17,7 @@
   - `811b54a test: cover tray popup window invariants`
   - `681c10d fix: align sidecar builder with installed buddy`
   - `53f18df fix: normalize BLE permission prompt ids`
+  - `1967819 docs: refresh teleport usage guidance`
 
 ## Requirement Audit
 
@@ -28,6 +29,7 @@
 | Plain debug launch does not fail with a missing packaged sidecar | `resolve_buddy_sidecar_path` falls back to the installed Buddy MCP entry in debug when no packaged sidecar exists; `.js` MCP entries spawn through `node`. | Proven by `cargo test` and observed `cargo run` startup |
 | Tauri app uses the correct terminal Buddy body/identity rather than random mock bodies | React starts from `DEFAULT_MASCOT_STATE`, not `MOCK_MASCOT_STATE`; runtime polling parses the seeded terminal Buddy (`TeleportSmoke`) in `npm run smoke:teleport-runtime`; sprite frames preserve parsed ASCII body lines. | Proven by source, unit tests, and runtime smoke |
 | Status, XP graph, name, species/rarity, personality, stats, and sprite body are preserved into React state | Rust parser extracts identity, XP, stats, personality, and sprite-only `ascii_art`; `frontend_buddy_payload` preserves them as camelCase; React renders identity, XP bar, stats, and sprite frames. | Proven by Rust/frontend tests |
+| React surfaces display the terminal Buddy fields, not duplicated or invented component fields | `buildBuddyIdentityView` is now shared by `BuddyStats` and `CharacterDisplay`; `buddyIdentityView.test.mjs` verifies terminal-style `TeleportAda` name, level, XP labels/bar percent, stat rows, reaction text, and ASCII body frames. | Proven by frontend unit test and typecheck |
 | Pet and Observe actions use the real Buddy sidecar path and refresh identity | `buddy_tool` calls `call_buddy_tool_once` with the cached sidecar path; `npm run smoke:teleport-tools` hatches `TeleportAda`, runs `buddy_pet` and `buddy_observe` through the Rust command helper, and verifies identity remains `TeleportAda` / `ROBOT`. | Proven by live smoke |
 | Observe path preserves guard-mode defaults and workspace cwd | `normalize_buddy_tool_args` adds `claims`, `edges`, and `cwd`; `scripts/buddy-teleport-out.sh` exports `BUDDY_WORKSPACE_CWD`. | Proven by Rust tests |
 | Desktop Return action teleports Buddy back to terminal state | `buddy_teleport_back` uses `teleport_back_once`, records `buddy_observe`, marks state offline, emits `buddy-teleported-back`, and disables polling. Live smoke verifies identity remains `TeleportAda` / `ROBOT` and payload mood is `sleeping`. | Proven by Rust tests and live smoke |
@@ -39,6 +41,7 @@
 
 - `npm test` from `buddy-desktop`
 - `npm run build` from `buddy-desktop`
+- `npm run typecheck` from `buddy-desktop`
 - `cargo test` from `buddy-desktop/src-tauri`
 - `npm run docs:check` from workspace root
 - `npm run smoke:teleport-tools` from workspace root
