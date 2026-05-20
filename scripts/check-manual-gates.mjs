@@ -32,6 +32,39 @@ checks.push({
   detail: buddyEntry,
 });
 
+const macosVersion = run("sw_vers", ["-productVersion"]);
+checks.push({
+  name: "macOS host version",
+  ok: macosVersion.status === 0,
+  detail: outputFor(macosVersion) || `exit ${macosVersion.status}`,
+});
+
+const claudeDesktopCandidates = [
+  "/Applications/Claude.app",
+  join(homedir(), "Applications", "Claude.app"),
+];
+const claudeDesktopPath = await (async () => {
+  for (const path of claudeDesktopCandidates) {
+    if (await fileExists(path)) {
+      return path;
+    }
+  }
+  return claudeDesktopCandidates.join(" or ");
+})();
+checks.push({
+  name: "Claude Desktop app",
+  ok: claudeDesktopCandidates.includes(claudeDesktopPath),
+  detail: claudeDesktopPath,
+});
+
+const bluetoothStatus = run("system_profiler", ["SPBluetoothDataType"]);
+const bluetoothOutput = outputFor(bluetoothStatus);
+checks.push({
+  name: "Bluetooth controller availability",
+  ok: bluetoothStatus.status === 0 && /\b(Bluetooth Power|State):\s*On\b/.test(bluetoothOutput),
+  detail: bluetoothOutput || `exit ${bluetoothStatus.status}`,
+});
+
 const cuaStatus = run("cua-driver", ["status"]);
 checks.push({
   name: "native GUI automation status",

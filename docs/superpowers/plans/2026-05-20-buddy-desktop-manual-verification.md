@@ -28,6 +28,8 @@ npm run check:manual-gates
 
 This reports whether the installed Buddy MCP entry exists and whether native GUI automation is available on the current host. A blocked native automation result means the checklist can still be completed manually, but it cannot be automated with `cua-driver` on that host.
 
+The preflight also reports the macOS version, Claude Desktop app presence, and Bluetooth controller availability. A missing/offline Bluetooth controller blocks real Claude Desktop Hardware Buddy pairing even when the Buddy Desktop code and Claude Desktop app are present.
+
 ## Terminal Buddy Identity
 
 Non-tray verification route:
@@ -112,3 +114,5 @@ Evidence to record:
 ## Current Automation Limitation
 
 Native GUI automation is currently blocked on this host because `cua-driver` is built for macOS 14 and fails to load `/usr/lib/swift/libswiftObservation.dylib`. Until a compatible host or driver is available, the GUI/tray and real Claude Desktop BLE checks above remain manual.
+
+On the current runner, `npm run check:manual-gates` also reports macOS `13.7.8`, finds Claude Desktop at `/Applications/Claude.app`, and cannot detect an active Bluetooth controller via `system_profiler SPBluetoothDataType`. That means real Claude Desktop BLE pairing is blocked by host hardware/runtime availability here, not just by missing app setup.
