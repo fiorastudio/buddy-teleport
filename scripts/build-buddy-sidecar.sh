@@ -2,7 +2,11 @@
 set -euo pipefail
 
 WORKSPACE="$(cd "$(dirname "$0")/.." && pwd)"
-BUDDY_DIR="${BUDDY_DIR:-$WORKSPACE/buddy}"
+DEFAULT_BUDDY_DIR="$HOME/.buddy/server"
+if [ ! -d "$DEFAULT_BUDDY_DIR" ]; then
+  DEFAULT_BUDDY_DIR="$WORKSPACE/buddy"
+fi
+BUDDY_DIR="${BUDDY_DIR:-$DEFAULT_BUDDY_DIR}"
 OUT_DIR="$WORKSPACE/buddy-desktop/src-tauri/binaries"
 
 if [ ! -d "$BUDDY_DIR" ]; then

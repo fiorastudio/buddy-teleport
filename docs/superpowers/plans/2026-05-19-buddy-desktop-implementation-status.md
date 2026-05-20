@@ -22,6 +22,7 @@
 - `npm run smoke:teleport-tools` creates an isolated Buddy DB and sidecar wrapper, then runs the live Rust smoke through the same command helpers used by popup Pet/Observe/Return actions.
 - Terminal-to-desktop teleport is represented by `.claude/commands/buddy-teleport.md` and `scripts/buddy-teleport-out.sh`.
 - The slash command now invokes `./scripts/buddy-teleport-out.sh` from the repo instead of a machine-specific absolute checkout path; the launcher defaults to `$HOME/.buddy/server`.
+- The sidecar builder now prefers `$HOME/.buddy/server` and falls back to `./buddy`, keeping release packaging aligned with the installed Buddy source used by dev/runtime smoke paths.
 - Desktop-to-terminal teleport is represented by the `buddy_teleport_back` Tauri command and popup **Return** action. It records a `buddy_observe` event, marks Buddy offline in desktop state, and disables polling until the app is restarted/teleported out again.
 - Tray source/config invariants are covered by tests: tray clicks target the configured hidden `status-popup` window, while the floating mascot uses a distinct `mascot` window route.
 - Popup Buddy actions now expose `buddy_pet` and `buddy_observe` through the same safe Tauri command allowlist, then refresh the cached terminal Buddy state. Desktop-originated `buddy_observe` calls preserve caller-provided `cwd` and otherwise default to `BUDDY_WORKSPACE_CWD`/process cwd; the teleport-out script exports `BUDDY_WORKSPACE_CWD` as the terminal workspace root.
@@ -34,7 +35,7 @@
 ## Next Concrete Steps
 
 1. Decide architecture direction: keep Rust MCP polling sidecar or restore the runtime TypeScript bridge boundary.
-2. Build the Buddy sidecar binary with `scripts/build-buddy-sidecar.sh`, preferably with `BUDDY_DIR=/Users/Sandbox_Jwu/.buddy/server` to avoid touching the ignored `buddy/` checkout.
+2. Build the Buddy sidecar binary with `scripts/build-buddy-sidecar.sh`; it prefers `$HOME/.buddy/server` and falls back to the ignored `buddy/` checkout.
 3. Use the popup **Pet**, **Observe**, and **Return** actions in a native app session against the real terminal Buddy DB.
 4. Add Playwright or another browser automation dependency if screenshot-level visual verification is required; current repo dependencies do not include Playwright.
 5. Manually verify macOS tray/menu-bar behavior.

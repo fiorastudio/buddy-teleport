@@ -48,6 +48,14 @@ if (!teleportLauncher.includes('BUDDY_SERVER_DIR="${BUDDY_SERVER_DIR:-$HOME/.bud
   throw new Error("teleport launcher must default to the current user's Buddy install under $HOME");
 }
 
+const sidecarBuilder = await readFile(new URL("scripts/build-buddy-sidecar.sh", workspaceRoot), "utf8");
+if (!sidecarBuilder.includes('DEFAULT_BUDDY_DIR="$HOME/.buddy/server"')) {
+  throw new Error("sidecar builder must prefer the current user's installed Buddy source");
+}
+if (!sidecarBuilder.includes('DEFAULT_BUDDY_DIR="$WORKSPACE/buddy"')) {
+  throw new Error("sidecar builder must still support a workspace-local Buddy checkout fallback");
+}
+
 const tauriConfig = JSON.parse(await readFile(new URL("src-tauri/tauri.conf.json", root), "utf8"));
 const statusPopupWindow = tauriConfig.app?.windows?.find((window) => window.label === "status-popup");
 if (!statusPopupWindow) {
