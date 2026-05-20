@@ -34,6 +34,20 @@ if (!bridgeFixtures.includes("current-stat-card.txt")) {
   throw new Error("bridge stat-card fixture missing");
 }
 
+const workspaceRoot = new URL("../", root);
+const teleportCommand = await readFile(new URL(".claude/commands/buddy-teleport.md", workspaceRoot), "utf8");
+if (!teleportCommand.includes("./scripts/buddy-teleport-out.sh")) {
+  throw new Error("Claude teleport command must invoke the repo-relative teleport launcher");
+}
+if (teleportCommand.includes("/Users/")) {
+  throw new Error("Claude teleport command must not hard-code a machine-specific checkout path");
+}
+
+const teleportLauncher = await readFile(new URL("scripts/buddy-teleport-out.sh", workspaceRoot), "utf8");
+if (!teleportLauncher.includes('BUDDY_SERVER_DIR="${BUDDY_SERVER_DIR:-$HOME/.buddy/server}"')) {
+  throw new Error("teleport launcher must default to the current user's Buddy install under $HOME");
+}
+
 const appSource = await readFile(new URL("src/App.tsx", root), "utf8");
 if (!appSource.includes("useState<MascotState>(DEFAULT_MASCOT_STATE)")) {
   throw new Error("App must start from the offline default state until terminal Buddy state arrives");

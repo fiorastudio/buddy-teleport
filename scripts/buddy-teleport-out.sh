@@ -2,7 +2,7 @@
 set -euo pipefail
 
 WORKSPACE="$(cd "$(dirname "$0")/.." && pwd)"
-BUDDY_SERVER_DIR="${BUDDY_SERVER_DIR:-/Users/Sandbox_Jwu/.buddy/server}"
+BUDDY_SERVER_DIR="${BUDDY_SERVER_DIR:-$HOME/.buddy/server}"
 BUDDY_ENTRY="${BUDDY_ENTRY:-$BUDDY_SERVER_DIR/dist/server/index.js}"
 WRAPPER_DIR="${TMPDIR:-/tmp}/buddy-teleport"
 WRAPPER="${BUDDY_SIDECAR_PATH:-$WRAPPER_DIR/buddy-sidecar}"

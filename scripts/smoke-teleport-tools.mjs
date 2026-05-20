@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 import { chmod, mkdtemp, rm, writeFile } from "node:fs/promises";
-import { tmpdir } from "node:os";
+import { homedir, tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { spawn } from "node:child_process";
 
 const workspace = join(dirname(fileURLToPath(import.meta.url)), "..");
-const buddyServerDir = process.env.BUDDY_SERVER_DIR || "/Users/Sandbox_Jwu/.buddy/server";
+const buddyServerDir = process.env.BUDDY_SERVER_DIR || join(homedir(), ".buddy/server");
 const buddyEntry = process.env.BUDDY_ENTRY || join(buddyServerDir, "dist/server/index.js");
 const tempRoot = await mkdtemp(join(tmpdir(), "buddy-teleport-tools-"));
 const dbPath = process.env.BUDDY_DB_PATH || join(tempRoot, "buddy.db");
