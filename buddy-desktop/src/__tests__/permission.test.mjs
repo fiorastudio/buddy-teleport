@@ -3,7 +3,7 @@ import test from "node:test";
 import { buildPermissionDecision, promptSummary } from "../utils/permission.mjs";
 
 test("builds approve once permission decision", () => {
-  assert.deepEqual(buildPermissionDecision({ id: "req_abc123" }, "once"), {
+  assert.deepEqual(buildPermissionDecision({ id: " req_abc123 " }, "once"), {
     cmd: "permission",
     id: "req_abc123",
     decision: "once",
@@ -16,6 +16,7 @@ test("builds deny permission decision", () => {
 
 test("rejects missing prompt id and invalid decisions", () => {
   assert.throws(() => buildPermissionDecision({}, "once"), /prompt id/);
+  assert.throws(() => buildPermissionDecision({ id: "   " }, "once"), /prompt id/);
   assert.throws(() => buildPermissionDecision({ id: "x" }, "always"), /decision/);
 });
 

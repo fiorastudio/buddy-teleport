@@ -27,6 +27,7 @@
 - Tray source/config invariants are covered by tests: tray clicks target the configured hidden `status-popup` window, while the floating mascot uses a distinct `mascot` window route.
 - Popup Buddy actions now expose `buddy_pet` and `buddy_observe` through the same safe Tauri command allowlist, then refresh the cached terminal Buddy state. Desktop-originated `buddy_observe` calls preserve caller-provided `cwd` and otherwise default to `BUDDY_WORKSPACE_CWD`/process cwd; the teleport-out script exports `BUDDY_WORKSPACE_CWD` as the terminal workspace root.
 - Permission approve/deny no longer routes through `buddy_tool`; the frontend builds a Claude BLE `permission` frame and sends it to the `ble_respond_permission` Tauri command boundary.
+- BLE permission response builders now normalize prompt ids consistently in React and Rust, and both sides reject blank ids and unsupported decisions.
 - The desktop visual surface intentionally does not render Buddy's terminal ASCII status card. The parser extracts identity, XP, stats, personality, and sprite-only lines; React should animate the sprite in the avatar area, while stats/card chrome render through dedicated visual sections.
 - The React app starts from the offline default state until Tauri returns the terminal Buddy state; it no longer shows the mock Buddy fixture during startup.
 - Initial React connection state is derived from the Buddy payload mood, so an offline cached Buddy payload stays offline until runtime polling provides a teleported terminal Buddy.

@@ -1,5 +1,6 @@
 export function buildPermissionDecision(prompt, decision) {
-  if (!prompt?.id) {
+  const id = String(prompt?.id ?? "").trim();
+  if (!id) {
     throw new Error("pending prompt id is required");
   }
   if (decision !== "once" && decision !== "deny") {
@@ -7,7 +8,7 @@ export function buildPermissionDecision(prompt, decision) {
   }
   return {
     cmd: "permission",
-    id: prompt.id,
+    id,
     decision,
   };
 }

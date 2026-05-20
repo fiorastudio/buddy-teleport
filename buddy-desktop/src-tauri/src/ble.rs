@@ -27,7 +27,7 @@ mod tests {
 
     #[test]
     fn builds_permission_response_frame() {
-        let frame = build_permission_response("req_abc123", "once").unwrap();
+        let frame = build_permission_response(" req_abc123 ", "once").unwrap();
 
         assert_eq!(frame["cmd"], "permission");
         assert_eq!(frame["id"], "req_abc123");
@@ -35,8 +35,18 @@ mod tests {
     }
 
     #[test]
+    fn builds_deny_permission_response_frame() {
+        let frame = build_permission_response("req_abc123", "deny").unwrap();
+
+        assert_eq!(frame["cmd"], "permission");
+        assert_eq!(frame["id"], "req_abc123");
+        assert_eq!(frame["decision"], "deny");
+    }
+
+    #[test]
     fn validates_permission_response_inputs() {
         assert!(build_permission_response("", "once").is_err());
+        assert!(build_permission_response("   ", "once").is_err());
         assert!(build_permission_response("req_abc123", "always").is_err());
     }
 }
