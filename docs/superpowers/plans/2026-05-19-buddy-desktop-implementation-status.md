@@ -49,7 +49,7 @@
 - BD-003 to BD-005: TypeScript Buddy bridge package exists with MCP JSON-RPC client, process launcher, normalized state mapper, sidecar protocol, and tests.
 - BD-006 to BD-007: shared state contract, popup components, offline/default state, and view-model tests exist.
 - Buddy visual treatment derives from parsed state fields instead of dumping the terminal card into the desktop UI; top stat controls avatar accent/surface, sprite-only ASCII animates in the avatar frame, reactions render as wrapped speech-bubble UI, and personality stats remain visible without showing the long personality description.
-- The popup startup path no longer renders `MOCK_MASCOT_STATE`, preventing a transient wrong body before the terminal Buddy state arrives.
+- The popup and mascot startup paths use the shared offline default from `stateDefaults.mjs`; the old production `MOCK_MASCOT_STATE` body has been removed, preventing a transient wrong body before the terminal Buddy state arrives.
 - Frontend smoke checks now guard the popup Pet/Observe/Return wiring and the initial terminal-Buddy connection-state handoff.
 - A static interaction prototype exists at `docs/review/buddy-desktop-interaction-prototype.html` for approval of persistent Buddy controls and wrapped speech-bubble reaction rendering.
 - BD-008 to BD-011: bridge sidecar launch spec, sidecar event protocol, Rust event boundary parsing, Rust Buddy MCP status parsing, safe Buddy tool forwarding, and teleport-back state handling exist.

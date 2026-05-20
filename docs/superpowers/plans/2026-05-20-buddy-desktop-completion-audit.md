@@ -6,7 +6,7 @@
 ## Current Repository State
 
 - Branch `main` is tracking `origin/main`.
-- Latest pushed commit before this shared-defaults pass: `5cac0d1 test: share terminal buddy state transitions`.
+- Latest pushed commit reviewed in this audit: `de413be fix: share runtime buddy defaults`.
 - Relevant follow-up commits reviewed/pushed in this pass:
   - `5a29444 fix: launch installed buddy in debug app`
   - `f3473ea fix: avoid mock buddy during startup`
@@ -22,6 +22,7 @@
   - `b73aa6e fix: hydrate mascot from terminal buddy state`
   - `d00e747 fix: remove production mock buddy body`
   - `5cac0d1 test: share terminal buddy state transitions`
+  - `de413be fix: share runtime buddy defaults`
 
 ## Requirement Audit
 
@@ -39,7 +40,7 @@
 | Desktop Return action teleports Buddy back to terminal state | `buddy_teleport_back` uses `teleport_back_once`, records `buddy_observe`, marks state offline, emits `buddy-teleported-back`, and disables polling. Live smoke verifies identity remains `TeleportAda` / `ROBOT` and payload mood is `sleeping`. | Proven by Rust tests and live smoke |
 | Tray click targets the popup window rather than the mascot surface | Tray constants target `status-popup`; `tauri.conf.json` defines `status-popup` hidden by default; mascot window uses a distinct `mascot` label and `window=mascot&companion=buddy` route. | Proven by Rust and frontend smoke tests |
 | BLE permission response frames are normalized consistently across frontend and Tauri | React `buildPermissionDecision` and Rust `build_permission_response` trim prompt ids, reject blank ids, and only allow `once`/`deny`. | Proven by frontend and Rust tests |
-| Work is checked into repository | Latest completed implementation work is committed and pushed to `origin/main`; this audit will be refreshed again after the documentation cleanup commit. | Proven by `git status --short --branch` and push results |
+| Work is checked into repository | Latest completed implementation work through `de413be` is committed and pushed to `origin/main`. | Proven by `git status --short --branch` and push results |
 
 ## Verification Commands Passed
 
@@ -62,6 +63,6 @@
 
 ## Audit Conclusion
 
-The terminal-to-desktop and desktop-to-terminal Buddy teleport logic is now strongly covered by source review, unit tests, isolated live Buddy smokes, and bounded native runtime smokes. The specific concern about wrong/random bodies is addressed by removing mock startup state, deriving connection from Buddy payload mood, and verifying live runtime parsing against seeded terminal Buddy DBs.
+The terminal-to-desktop and desktop-to-terminal Buddy teleport logic is now strongly covered by source review, unit tests, isolated live Buddy smokes, and bounded native runtime smokes. The specific concern about wrong/random bodies is addressed by removing mock startup state, deleting the production mock Buddy body, sharing one runtime default-state source, deriving connection from Buddy payload mood, and verifying live runtime parsing against seeded terminal Buddy DBs.
 
 The goal should remain open until the environment supports native GUI/tray automation or a human manually verifies the popup and tray surfaces, plus real Claude Desktop BLE pairing.
