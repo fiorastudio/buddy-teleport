@@ -56,6 +56,42 @@ if (!sidecarBuilder.includes('DEFAULT_BUDDY_DIR="$WORKSPACE/buddy"')) {
   throw new Error("sidecar builder must still support a workspace-local Buddy checkout fallback");
 }
 
+const readme = await readFile(new URL("README.md", workspaceRoot), "utf8");
+for (const requiredSnippet of [
+  "./scripts/buddy-teleport-out.sh",
+  "$HOME/.buddy/server",
+  "BUDDY_DIR=/path/to/buddy/server",
+  "**Return**",
+]) {
+  if (!readme.includes(requiredSnippet)) {
+    throw new Error(`README teleport contract missing expected snippet: ${requiredSnippet}`);
+  }
+}
+if (readme.includes("/Users/")) {
+  throw new Error("README must not hard-code a machine-specific checkout path");
+}
+if (readme.includes("Return to terminal")) {
+  throw new Error("README must match the current popup action label: Return");
+}
+
+const claudeGuide = await readFile(new URL("CLAUDE.md", workspaceRoot), "utf8");
+for (const requiredSnippet of [
+  "$HOME/.buddy/server",
+  "commands.rs",
+  "ble.rs",
+  "buddy-teleport-out.sh",
+  "2026-05-20-buddy-desktop-completion-audit.md",
+]) {
+  if (!claudeGuide.includes(requiredSnippet)) {
+    throw new Error(`CLAUDE.md guidance missing expected snippet: ${requiredSnippet}`);
+  }
+}
+for (const staleSnippet of ["buddy_commands.rs", "ble_companion.rs", "fully written, ready to execute"]) {
+  if (claudeGuide.includes(staleSnippet)) {
+    throw new Error(`CLAUDE.md still contains stale guidance: ${staleSnippet}`);
+  }
+}
+
 const tauriConfig = JSON.parse(await readFile(new URL("src-tauri/tauri.conf.json", root), "utf8"));
 const statusPopupWindow = tauriConfig.app?.windows?.find((window) => window.label === "status-popup");
 if (!statusPopupWindow) {

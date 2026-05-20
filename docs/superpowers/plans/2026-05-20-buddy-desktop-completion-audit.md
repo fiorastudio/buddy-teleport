@@ -5,8 +5,8 @@
 
 ## Current Repository State
 
-- Branch `main` is clean and tracking `origin/main`.
-- Latest pushed commit at audit time: `bd79fe3 fix: make teleport command repo-relative`.
+- Branch `main` is tracking `origin/main`.
+- Latest pushed commit before this documentation refresh: `53f18df fix: normalize BLE permission prompt ids`.
 - Relevant follow-up commits reviewed/pushed in this pass:
   - `5a29444 fix: launch installed buddy in debug app`
   - `f3473ea fix: avoid mock buddy during startup`
@@ -14,12 +14,15 @@
   - `4d72972 test: add live teleport tool smoke`
   - `b0cbf04 test: cover teleport back command path`
   - `bd79fe3 fix: make teleport command repo-relative`
+  - `811b54a test: cover tray popup window invariants`
+  - `681c10d fix: align sidecar builder with installed buddy`
+  - `53f18df fix: normalize BLE permission prompt ids`
 
 ## Requirement Audit
 
 | Requirement | Current Evidence | Status |
 | --- | --- | --- |
-| Terminal user can invoke teleport-out via a slash-command-like entrypoint | `.claude/commands/buddy-teleport.md` invokes `./scripts/buddy-teleport-out.sh`; `buddy-desktop/scripts/smoke.mjs` fails if it regresses to a machine-specific `/Users/...` path. | Proven by source and smoke test |
+| Terminal user can invoke teleport-out via a slash-command-like entrypoint | `.claude/commands/buddy-teleport.md` invokes `./scripts/buddy-teleport-out.sh`; `README.md` documents the same repo-relative launcher; `buddy-desktop/scripts/smoke.mjs` fails if the slash command or README regresses to a machine-specific `/Users/...` path. | Proven by source and smoke test |
 | Teleport launcher uses the terminal Buddy install and DB, not a desktop-only Buddy | `scripts/buddy-teleport-out.sh` defaults to `$HOME/.buddy/server`, prints `BUDDY_DB_PATH`/`$HOME/.buddy/buddy.db`, creates a `BUDDY_SIDECAR_PATH` wrapper, and exports `BUDDY_WORKSPACE_CWD`. | Proven by source and live smoke |
 | Release sidecar builder uses the same installed Buddy source by default | `scripts/build-buddy-sidecar.sh` now prefers `$HOME/.buddy/server` and falls back to a workspace-local `buddy/` checkout. | Proven by source and smoke test |
 | Plain debug launch does not fail with a missing packaged sidecar | `resolve_buddy_sidecar_path` falls back to the installed Buddy MCP entry in debug when no packaged sidecar exists; `.js` MCP entries spawn through `node`. | Proven by `cargo test` and observed `cargo run` startup |
@@ -30,7 +33,7 @@
 | Desktop Return action teleports Buddy back to terminal state | `buddy_teleport_back` uses `teleport_back_once`, records `buddy_observe`, marks state offline, emits `buddy-teleported-back`, and disables polling. Live smoke verifies identity remains `TeleportAda` / `ROBOT` and payload mood is `sleeping`. | Proven by Rust tests and live smoke |
 | Tray click targets the popup window rather than the mascot surface | Tray constants target `status-popup`; `tauri.conf.json` defines `status-popup` hidden by default; mascot window uses a distinct `mascot` label and `window=mascot&companion=buddy` route. | Proven by Rust and frontend smoke tests |
 | BLE permission response frames are normalized consistently across frontend and Tauri | React `buildPermissionDecision` and Rust `build_permission_response` trim prompt ids, reject blank ids, and only allow `once`/`deny`. | Proven by frontend and Rust tests |
-| Work is checked into repository | Latest work is committed and pushed to `origin/main`. | Proven by `git status --short --branch` and push results |
+| Work is checked into repository | Latest completed implementation work is committed and pushed to `origin/main`; this audit will be refreshed again after the documentation cleanup commit. | Proven by `git status --short --branch` and push results |
 
 ## Verification Commands Passed
 

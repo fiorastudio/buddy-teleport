@@ -15,14 +15,15 @@ This workspace builds **buddy-desktop**: a native macOS floating mascot window t
 
 ```
 buddy_openhuman_teleport/
-├── buddy-desktop/    # NEW MIT-licensed Tauri v2 app (the main deliverable)
-├── buddy/            # clone of fiorastudio/buddy — read-only, never modified
+├── buddy-desktop/    # MIT-licensed Tauri v2 app (the main deliverable)
+├── buddy/            # optional ignored fallback checkout of fiorastudio/buddy
 ├── scripts/
-│   └── build-buddy-sidecar.sh   # compiles buddy into pkg binary for sidecar
+│   ├── buddy-teleport-out.sh    # launches desktop teleport from terminal Buddy
+│   └── build-buddy-sidecar.sh   # compiles Buddy into a pkg binary for release sidecar
 ├── docs/
 │   └── superpowers/
 │       ├── specs/2026-05-18-buddy-openhuman-integration-design.md  # approved design
-│       └── plans/2026-05-18-buddy-desktop-plan-a-mcp-sidecar.md    # 12-task impl plan
+│       └── plans/2026-05-20-buddy-desktop-completion-audit.md      # current verification audit
 └── CLAUDE.md
 ```
 
@@ -30,7 +31,7 @@ buddy_openhuman_teleport/
 
 - `buddy-desktop/` is **MIT licensed** — keep it that way.
 - openhuman is GPL-3.0. We implement the mascot window from scratch using objc2 (same Rust crate openhuman uses), but write the code independently. Never copy openhuman source files.
-- buddy is MIT. No source changes are made to buddy — it's compiled into a sidecar binary using `pkg`.
+- buddy is MIT. No source changes are made to buddy in this repository. Development defaults to the installed Buddy source at `$HOME/.buddy/server`; an ignored workspace-local `buddy/` checkout is only a fallback for sidecar builds.
 
 ## Architecture (approved design)
 
@@ -48,38 +49,43 @@ The Rust backend in `buddy-desktop/src-tauri/` owns:
 - `buddy_sidecar.rs` — spawn/kill buddy, stdio JSON-RPC framing
 - `buddy_client.rs` — MCP client + stat card parser
 - `buddy_poll.rs` — 2s polling loop, emits `mascot-state-updated` Tauri event
-- `buddy_commands.rs` — Tauri commands for frontend interactions
+- `commands.rs` — Tauri commands for frontend interactions, safe Buddy tools, and teleport back
 - `mascot_state.rs` — BuddyMcpState, AnimationState, state merge logic
-- `ble_companion.rs` — BLE Nordic UART peripheral (Plan B)
+- `ble.rs` — BLE Nordic UART peripheral and permission-prompt handling
+- `tray.rs` — menu bar tray and status popup routing
+- `mascot_window.rs` — separate desktop mascot window creation
 
 The React frontend in `buddy-desktop/src/` renders `BuddyMascot` when `?window=mascot&companion=buddy`.
 
 ## Implementation Status
 
-- **Plan A** (MCP sidecar → mascot window): 12 tasks, fully written, ready to execute.
-- **Plan B** (BLE companion + permission overlay + GIF character packs): spec written, plan not yet written.
+- **Terminal Buddy teleport** (MCP sidecar → desktop mascot): implemented and covered by unit, smoke, and live isolated-tool tests.
+- **Desktop back to terminal**: implemented through the **Return** action, which records `buddy_observe` and stops desktop polling until the next teleport-out.
+- **Buddy identity rendering**: implemented from terminal `buddy_status`; the desktop app renders the terminal Buddy's name, level, XP, stats, species/rarity, personality, and parsed ASCII body instead of hatching a random desktop-only Buddy.
+- **BLE companion protocol**: implementation and permission prompt paths exist, but real Claude Desktop pairing remains a manual verification gate.
 
-See `docs/superpowers/plans/2026-05-18-buddy-desktop-plan-a-mcp-sidecar.md` for the full Plan A task list with complete code.
+See `docs/superpowers/plans/2026-05-20-buddy-desktop-completion-audit.md` for the current requirement-by-requirement verification state.
 
 ## Working in buddy-desktop (Tauri v2)
 
 ```bash
 cd buddy-desktop
 pnpm install
-pnpm tauri dev        # dev mode
+pnpm tauri dev        # dev mode; falls back to $HOME/.buddy/server if no debug sidecar exists
 pnpm tauri build      # production build
 ```
 
 Rust workspace: `buddy-desktop/src-tauri/Cargo.toml`. Run `cargo build` from there for Rust only.
 
-## Working in buddy (MCP server — read only)
+## Working With Buddy Source
 
 ```bash
-cd buddy
-npm install
-npm run build         # tsc compile → dist/
-npm test              # vitest
+cd "$HOME/.buddy/server"
+npm run build         # tsc compile -> dist/
+npm test              # vitest, if dependencies are installed
 ```
+
+Use the installed Buddy source at `$HOME/.buddy/server` by default. Do not clone Buddy into this repository unless a task explicitly needs the ignored fallback checkout.
 
 ## Building the sidecar binary
 
@@ -88,7 +94,19 @@ npm test              # vitest
 # outputs: buddy-desktop/src-tauri/binaries/buddy-server-aarch64-apple-darwin
 ```
 
-Requires `pkg` installed globally (`npm install -g @vercel/pkg`). The binary is gitignored — rebuild it whenever buddy's source changes.
+The builder prefers `$HOME/.buddy/server`, falls back to `./buddy`, and accepts `BUDDY_DIR=/path/to/buddy/server` for explicit source selection. Requires `pkg` installed globally (`npm install -g @vercel/pkg`). The binary is gitignored; rebuild it whenever Buddy's source changes.
+
+## Teleport Checks
+
+```bash
+./scripts/buddy-teleport-out.sh
+cd buddy-desktop
+npm test
+npm run smoke:teleport-tools
+npm run smoke:teleport-runtime
+```
+
+The Claude slash command artifact `.claude/commands/buddy-teleport.md` invokes the same repo-relative teleport launcher.
 
 ## Key Protocol Reference: claude-desktop-buddy BLE
 

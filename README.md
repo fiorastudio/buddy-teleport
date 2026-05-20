@@ -40,7 +40,7 @@ buddy_openhuman_teleport/
 
 ### Installation
 
-1. Clone the repository and submodules.
+1. Clone the repository.
 2. Install dependencies for the main app:
    ```bash
    cd buddy-desktop
@@ -54,19 +54,29 @@ buddy_openhuman_teleport/
 
 ### Running in Development
 
+The normal teleport entrypoint starts the app with your installed terminal Buddy:
+
+```bash
+./scripts/buddy-teleport-out.sh
+```
+
+From `buddy-desktop/`, you can also run Tauri directly:
+
 ```bash
 cd buddy-desktop
 BUDDY_SIDECAR_PATH=/path/to/buddy-server-or-wrapper pnpm tauri dev
 ```
 
-If `BUDDY_SIDECAR_PATH` is omitted, the app uses the packaged sidecar binary from Tauri resources. The sidecar inherits the normal Buddy environment, so by default it reads the same `~/.buddy/buddy.db` that terminal Buddy uses. Set `BUDDY_DB_PATH` only for isolated smoke tests.
+If `BUDDY_SIDECAR_PATH` is omitted, release builds use the packaged sidecar binary from Tauri resources. Debug builds first use an existing packaged debug sidecar if present, then fall back to `$HOME/.buddy/server/dist/server/index.js`. The sidecar inherits the normal Buddy environment, so by default it reads the same `~/.buddy/buddy.db` that terminal Buddy uses. Set `BUDDY_DB_PATH` only for isolated smoke tests.
 
 ### Building the Sidecar
 
 To bundle the Buddy MCP server into a sidecar binary:
 ```bash
-BUDDY_DIR=/Users/Sandbox_Jwu/.buddy/server ./scripts/build-buddy-sidecar.sh
+./scripts/build-buddy-sidecar.sh
 ```
+
+The builder prefers `$HOME/.buddy/server`, falls back to a workspace-local `./buddy` checkout, and can be pointed at another Buddy source with `BUDDY_DIR=/path/to/buddy/server`.
 
 ### Teleport Contract
 
@@ -75,15 +85,24 @@ Buddy Teleport must not hatch a random desktop-only Buddy. The desktop app polls
 Terminal to desktop:
 
 ```bash
-/Users/Sandbox_Jwu/Documents/buddy_openhuman_teleport/scripts/buddy-teleport-out.sh
+./scripts/buddy-teleport-out.sh
 ```
 
 The same launcher is available as the Claude slash command artifact `.claude/commands/buddy-teleport.md`.
 
 Desktop back to terminal:
 
-- Use the popup action **Return to terminal**.
+- Use the popup action **Return**.
 - The app records a `buddy_observe` event and disables desktop polling so the terminal Buddy remains the source of truth until teleported out again.
+
+Verification commands:
+
+```bash
+cd buddy-desktop
+npm test
+npm run smoke:teleport-tools
+npm run smoke:teleport-runtime
+```
 
 ## Implementation Status
 
