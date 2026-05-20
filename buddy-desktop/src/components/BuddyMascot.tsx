@@ -4,7 +4,7 @@ import { invoke } from "@tauri-apps/api/core";
 import type { MascotState } from "../types/state";
 import { BuddyStats } from "./BuddyStats";
 import { CharacterDisplay } from "./CharacterDisplay";
-import { DEFAULT_MASCOT_STATE } from "../types/state";
+import { DEFAULT_MASCOT_STATE } from "../utils/stateDefaults.mjs";
 import {
   stateFromMascotEvent,
   stateWithInitialBuddy,

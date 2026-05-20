@@ -27,3 +27,11 @@ export const DEFAULT_MASCOT_STATE = {
   claudeSession: null,
   errorMessage: null,
 };
+
+export const DEFAULT_CLAUDE_SESSION_STATE = {
+  status: "inactive",
+  projectName: null,
+  activeFile: null,
+  lastPromptSummary: null,
+  updatedAt: null,
+};

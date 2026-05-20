@@ -156,5 +156,15 @@ const stateTypesSource = await readFile(new URL("src/types/state.ts", root), "ut
 if (stateTypesSource.includes("MOCK_MASCOT_STATE") || stateTypesSource.includes("mock-buddy")) {
   throw new Error("Production state types must not define a mock Buddy body");
 }
+if (stateTypesSource.includes("DEFAULT_BUDDY_STATE") || stateTypesSource.includes("DEFAULT_MASCOT_STATE")) {
+  throw new Error("Production state types must not duplicate runtime Buddy defaults");
+}
+
+const stateDefaultsSource = await readFile(new URL("src/utils/stateDefaults.mjs", root), "utf8");
+for (const requiredSnippet of ["DEFAULT_BUDDY_STATE", "DEFAULT_MASCOT_STATE"]) {
+  if (!stateDefaultsSource.includes(requiredSnippet)) {
+    throw new Error(`Shared state defaults missing expected export: ${requiredSnippet}`);
+  }
+}
 
 console.log("smoke prerequisites passed");

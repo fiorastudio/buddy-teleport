@@ -9,10 +9,8 @@ import {
   stateWithReturnedBuddy,
 } from "./utils/appState.mjs";
 import { buildPermissionDecision } from "./utils/permission.mjs";
-import {
-  DEFAULT_MASCOT_STATE,
-  type MascotState,
-} from "./types/state";
+import { DEFAULT_MASCOT_STATE } from "./utils/stateDefaults.mjs";
+import type { MascotState } from "./types/state";
 
 export function App() {
   const [state, setState] = useState<MascotState>(DEFAULT_MASCOT_STATE);

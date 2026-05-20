@@ -1,10 +1,8 @@
 import { BuddyStats } from "./BuddyStats";
 import { CharacterDisplay } from "./CharacterDisplay";
 import { ApproveOverlay } from "./ApproveOverlay";
-import {
-  DEFAULT_MASCOT_STATE,
-  type MascotState,
-} from "../types/state";
+import { DEFAULT_MASCOT_STATE } from "../utils/stateDefaults.mjs";
+import type { MascotState } from "../types/state";
 import { buildStatusPopupViewModel } from "../utils/statusPopupViewModel.mjs";
 
 export interface StatusPopupProps {
