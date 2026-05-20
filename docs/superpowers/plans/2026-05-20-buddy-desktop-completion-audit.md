@@ -10,6 +10,7 @@
   - `051257f test: add non-tray popup verification path`
   - `2b68d57 test: report manual host gates`
   - `77ab88f test: cover returned buddy identity fields`
+  - `d8c005d docs: document teleport return contract`
 - Relevant follow-up commits reviewed/pushed in this pass:
   - `5a29444 fix: launch installed buddy in debug app`
   - `f3473ea fix: avoid mock buddy during startup`
@@ -31,12 +32,13 @@
   - `051257f test: add non-tray popup verification path`
   - `2b68d57 test: report manual host gates`
   - `77ab88f test: cover returned buddy identity fields`
+  - `d8c005d docs: document teleport return contract`
 
 ## Requirement Audit
 
 | Requirement | Current Evidence | Status |
 | --- | --- | --- |
-| Terminal user can invoke teleport-out via a slash-command-like entrypoint | `.claude/commands/buddy-teleport.md` invokes `./scripts/buddy-teleport-out.sh`; `README.md` documents the same repo-relative launcher; `buddy-desktop/scripts/smoke.mjs` fails if the slash command or README regresses to a machine-specific `/Users/...` path. | Proven by source and smoke test |
+| Terminal user can invoke teleport-out via a slash-command-like entrypoint | `.claude/commands/buddy-teleport.md` invokes `./scripts/buddy-teleport-out.sh`, documents the **Return** action for teleporting back, and states that terminal `buddy_status` remains the source of truth after return; `README.md` documents the same repo-relative launcher; `buddy-desktop/scripts/smoke.mjs` and `scripts/check-doc-boundaries.mjs` fail if the slash command or README regresses to a machine-specific `/Users/...` path or omits the return contract. | Proven by source and smoke test |
 | Teleport launcher uses the terminal Buddy install and DB, not a desktop-only Buddy | `scripts/buddy-teleport-out.sh` defaults to `$HOME/.buddy/server`, prints `BUDDY_DB_PATH`/`$HOME/.buddy/buddy.db`, creates a `BUDDY_SIDECAR_PATH` wrapper, and exports `BUDDY_WORKSPACE_CWD`. | Proven by source and live smoke |
 | Release sidecar builder uses the same installed Buddy source by default | `scripts/build-buddy-sidecar.sh` now prefers `$HOME/.buddy/server` and falls back to a workspace-local `buddy/` checkout. | Proven by source and smoke test |
 | Plain debug launch does not fail with a missing packaged sidecar | `resolve_buddy_sidecar_path` falls back to the installed Buddy MCP entry in debug when no packaged sidecar exists; `.js` MCP entries spawn through `node`. | Proven by `cargo test` and observed `cargo run` startup |

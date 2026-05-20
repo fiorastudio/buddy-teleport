@@ -41,9 +41,20 @@ const checks = [
     ],
   },
   {
+    file: ".claude/commands/buddy-teleport.md",
+    required: [
+      "./scripts/buddy-teleport-out.sh",
+      "~/.buddy/buddy.db",
+      "**Return**",
+      "buddy_observe",
+      "terminal `buddy_status`",
+    ],
+  },
+  {
     file: "docs/superpowers/plans/2026-05-20-buddy-desktop-completion-audit.md",
     required: [
       "Latest implementation and verification commits reviewed in this audit include:",
+      "d8c005d docs: document teleport return contract",
       "Completed implementation and verification work is committed and pushed to `origin/main`",
       "npm run verify:automated",
       "npm run smoke:popup-actions",
