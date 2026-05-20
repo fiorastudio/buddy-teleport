@@ -7,9 +7,9 @@
 
 - Branch `main` is tracking `origin/main`.
 - Latest implementation and verification commits reviewed in this audit include:
-  - `de413be fix: share runtime buddy defaults`
-  - `910f01a test: add automated verification entrypoint`
-  - `372001d test: guard teleport verification docs`
+  - `051257f test: add non-tray popup verification path`
+  - `2b68d57 test: report manual host gates`
+  - `77ab88f test: cover returned buddy identity fields`
 - Relevant follow-up commits reviewed/pushed in this pass:
   - `5a29444 fix: launch installed buddy in debug app`
   - `f3473ea fix: avoid mock buddy during startup`
@@ -28,6 +28,9 @@
   - `de413be fix: share runtime buddy defaults`
   - `910f01a test: add automated verification entrypoint`
   - `372001d test: guard teleport verification docs`
+  - `051257f test: add non-tray popup verification path`
+  - `2b68d57 test: report manual host gates`
+  - `77ab88f test: cover returned buddy identity fields`
 
 ## Requirement Audit
 
@@ -39,11 +42,11 @@
 | Plain debug launch does not fail with a missing packaged sidecar | `resolve_buddy_sidecar_path` falls back to the installed Buddy MCP entry in debug when no packaged sidecar exists; `.js` MCP entries spawn through `node`. | Proven by `cargo test` and observed `cargo run` startup |
 | Tauri app uses the correct terminal Buddy body/identity rather than random mock bodies | React starts from the shared `DEFAULT_MASCOT_STATE` in `stateDefaults.mjs`; the unused `MOCK_MASCOT_STATE` production body has been removed; runtime polling parses the seeded terminal Buddy (`TeleportSmoke`) in `npm run smoke:teleport-runtime`; sprite frames preserve parsed ASCII body lines; the floating `BuddyMascot` root now fetches `buddy_get_state` on mount instead of waiting only for later poll events; `App` and `BuddyMascot` now use shared state helpers for terminal hydration and return events. | Proven by source, unit tests, and runtime smoke |
 | Status, XP graph, name, species/rarity, personality, stats, and sprite body are preserved into React state | Rust parser extracts identity, XP, stats, personality, and sprite-only `ascii_art`; `frontend_buddy_payload` preserves them as camelCase; React renders identity, XP bar, stats, and sprite frames. | Proven by Rust/frontend tests |
-| React surfaces display the terminal Buddy fields, not duplicated or invented component fields | `buildBuddyIdentityView` is now shared by `BuddyStats` and `CharacterDisplay`; `buddyIdentityView.test.mjs` verifies terminal-style `TeleportAda` name, level, XP labels/bar percent, stat rows, reaction text, and ASCII body frames; `appState.test.mjs` verifies shared terminal hydration, refresh, mascot event, and return-event transitions; `scripts/smoke.mjs` guards `BuddyMascot` startup state fetch, return-event handling, absence of production mock Buddy bodies, and absence of duplicated runtime defaults in `types/state.ts`. | Proven by frontend unit test, smoke test, and typecheck |
+| React surfaces display the terminal Buddy fields, not duplicated or invented component fields | `buildBuddyIdentityView` is now shared by `BuddyStats` and `CharacterDisplay`; `buddyIdentityView.test.mjs` verifies terminal-style `TeleportAda` name, level, XP labels/bar percent, stat rows, reaction text, and ASCII body frames; `appState.test.mjs` verifies shared terminal hydration, refresh, mascot event, raw return payload, and wrapped return-event transitions while preserving name, species/rarity, level, XP, XP target, stats, personality, reaction, and ASCII body under `state.buddy`; `scripts/smoke.mjs` guards `BuddyMascot` startup state fetch, return-event handling, absence of production mock Buddy bodies, and absence of duplicated runtime defaults in `types/state.ts`. | Proven by frontend unit test, smoke test, and typecheck |
 | Pet and Observe actions use the real Buddy sidecar path and refresh identity | `buddy_tool` calls `call_buddy_tool_once` with the cached sidecar path; `npm run smoke:teleport-tools` hatches `TeleportAda`, runs `buddy_pet` and `buddy_observe` through the Rust command helper, and verifies identity remains `TeleportAda` / `ROBOT`. | Proven by live smoke |
 | Observe path preserves guard-mode defaults and workspace cwd | `normalize_buddy_tool_args` adds `claims`, `edges`, and `cwd`; `scripts/buddy-teleport-out.sh` exports `BUDDY_WORKSPACE_CWD`. | Proven by Rust tests |
 | Desktop Return action teleports Buddy back to terminal state | `buddy_teleport_back` uses `teleport_back_once`, records `buddy_observe`, marks state offline, emits `buddy-teleported-back`, and disables polling. Live smoke verifies identity remains `TeleportAda` / `ROBOT` and payload mood is `sleeping`. | Proven by Rust tests and live smoke |
-| Popup behavior is verifiable without native tray automation | `/?window=status-popup` routes to the same `App`/`StatusPopup` path used by the tray popup; `scripts/smoke.mjs` guards the route, popup action wiring, and absence of mock Buddy bodies. | Proven by frontend smoke tests |
+| Popup behavior is verifiable without native tray automation | `/?window=status-popup` routes to the same `App`/`StatusPopup` path used by the tray popup; `windowRoute.test.mjs` verifies explicit popup routing, separate mascot routing, and default popup routing; `scripts/smoke.mjs` guards the route, popup action wiring, and absence of mock Buddy bodies. | Proven by frontend tests and smoke tests |
 | Tray click targets the popup window rather than the mascot surface | Tray constants target `status-popup`; `tauri.conf.json` defines `status-popup` hidden by default; mascot window uses a distinct `mascot` label and `window=mascot&companion=buddy` route. | Proven by Rust and frontend smoke tests; native click remains manual |
 | BLE permission response frames are normalized consistently across frontend and Tauri | React `buildPermissionDecision` and Rust `build_permission_response` trim prompt ids, reject blank ids, and only allow `once`/`deny`. | Proven by frontend and Rust tests |
 | Work is checked into repository | Completed implementation and verification work is committed and pushed to `origin/main`; audit-only sync commits may follow without changing the implementation evidence. | Proven by `git status --short --branch` and push results |
@@ -60,11 +63,13 @@
 - `npm run smoke:teleport-tools` from workspace root
 - `npm run smoke:teleport-runtime` from workspace root
 - `git diff --check` from workspace root
+- `npm run check:manual-gates` from workspace root
 - Plain `cargo run` from `buddy-desktop/src-tauri` started `target/debug/buddy-desktop` and spawned `node $HOME/.buddy/server/dist/server/index.js` without the previous missing-sidecar retry loop.
 
 ## Remaining Gates
 
 - Native GUI automation is blocked on this host as of 2026-05-20: `cua-driver status` and `cua-driver check_permissions '{"prompt":false}'` both fail because `/Applications/CuaDriver.app/Contents/MacOS/cua-driver` was built for macOS 14 and cannot load `/usr/lib/swift/libswiftObservation.dylib` on this OS.
+- `npm run check:manual-gates` now reports macOS version, installed Buddy MCP entry, Claude Desktop app presence, Bluetooth controller availability, and native GUI automation status. On this host it passes macOS `13.7.8`, installed Buddy, and `/Applications/Claude.app`, then blocks on Bluetooth controller availability and CuaDriver compatibility.
 - Because native GUI automation is unavailable, direct click verification of popup **Pet**, **Observe**, **Return**, and tray/menu-bar behavior remains manual/environment-gated; source/config invariants for tray target selection are covered.
 - Browser screenshot automation for the Tauri webview remains unavailable through the required in-app browser Node REPL tool in this session.
 - Claude Desktop BLE pairing and real Hardware Buddy permission flow still require manual pairing with Claude Desktop; protocol parsing, fake peripheral behavior, and permission frame serialization are covered by automated tests.
