@@ -40,7 +40,7 @@ const checks = [
   {
     file: "docs/superpowers/plans/2026-05-20-buddy-desktop-completion-audit.md",
     required: [
-      "910f01a test: add automated verification entrypoint",
+      "372001d test: guard teleport verification docs",
       "npm run verify:automated",
       "docs/superpowers/plans/2026-05-20-buddy-desktop-manual-verification.md",
     ],

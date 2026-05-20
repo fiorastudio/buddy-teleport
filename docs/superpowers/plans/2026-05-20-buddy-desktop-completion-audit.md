@@ -6,7 +6,7 @@
 ## Current Repository State
 
 - Branch `main` is tracking `origin/main`.
-- Latest pushed commit reviewed in this audit: `910f01a test: add automated verification entrypoint`.
+- Latest pushed commit reviewed in this audit: `372001d test: guard teleport verification docs`.
 - Relevant follow-up commits reviewed/pushed in this pass:
   - `5a29444 fix: launch installed buddy in debug app`
   - `f3473ea fix: avoid mock buddy during startup`
@@ -24,6 +24,7 @@
   - `5cac0d1 test: share terminal buddy state transitions`
   - `de413be fix: share runtime buddy defaults`
   - `910f01a test: add automated verification entrypoint`
+  - `372001d test: guard teleport verification docs`
 
 ## Requirement Audit
 
@@ -41,7 +42,7 @@
 | Desktop Return action teleports Buddy back to terminal state | `buddy_teleport_back` uses `teleport_back_once`, records `buddy_observe`, marks state offline, emits `buddy-teleported-back`, and disables polling. Live smoke verifies identity remains `TeleportAda` / `ROBOT` and payload mood is `sleeping`. | Proven by Rust tests and live smoke |
 | Tray click targets the popup window rather than the mascot surface | Tray constants target `status-popup`; `tauri.conf.json` defines `status-popup` hidden by default; mascot window uses a distinct `mascot` label and `window=mascot&companion=buddy` route. | Proven by Rust and frontend smoke tests |
 | BLE permission response frames are normalized consistently across frontend and Tauri | React `buildPermissionDecision` and Rust `build_permission_response` trim prompt ids, reject blank ids, and only allow `once`/`deny`. | Proven by frontend and Rust tests |
-| Work is checked into repository | Latest completed implementation work through `910f01a` is committed and pushed to `origin/main`. | Proven by `git status --short --branch` and push results |
+| Work is checked into repository | Latest completed implementation work through `372001d` is committed and pushed to `origin/main`. | Proven by `git status --short --branch` and push results |
 
 ## Verification Commands Passed
 
