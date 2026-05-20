@@ -98,8 +98,13 @@ Desktop back to terminal:
 Verification commands:
 
 ```bash
-cd buddy-desktop
-npm test
+npm run verify:automated
+```
+
+For targeted checks:
+
+```bash
+npm --prefix buddy-desktop test
 npm run smoke:teleport-tools
 npm run smoke:teleport-runtime
 ```

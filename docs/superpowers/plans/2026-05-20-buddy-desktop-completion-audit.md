@@ -44,6 +44,7 @@
 
 ## Verification Commands Passed
 
+- `npm run verify:automated` from workspace root
 - `npm test` from `buddy-desktop`
 - `npm run build` from `buddy-desktop`
 - `npm run typecheck` from `buddy-desktop`

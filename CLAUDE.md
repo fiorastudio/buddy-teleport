@@ -100,13 +100,10 @@ The builder prefers `$HOME/.buddy/server`, falls back to `./buddy`, and accepts 
 ## Teleport Checks
 
 ```bash
-./scripts/buddy-teleport-out.sh
-cd buddy-desktop
-npm test
-npm run smoke:teleport-tools
-npm run smoke:teleport-runtime
+npm run verify:automated
 ```
 
+For a manual dev launch, run `./scripts/buddy-teleport-out.sh`.
 The Claude slash command artifact `.claude/commands/buddy-teleport.md` invokes the same repo-relative teleport launcher.
 
 ## Key Protocol Reference: claude-desktop-buddy BLE
