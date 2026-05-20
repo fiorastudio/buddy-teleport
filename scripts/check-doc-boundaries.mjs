@@ -25,6 +25,34 @@ const checks = [
       "fiorastudio/buddy",
       "anthropics/claude-desktop-buddy",
       "Do NOT fork or copy",
+      "npm run verify:automated",
+      "docs/superpowers/plans/2026-05-20-buddy-desktop-manual-verification.md",
+    ],
+  },
+  {
+    file: "README.md",
+    required: [
+      "npm run verify:automated",
+      "Buddy Teleport must not hatch a random desktop-only Buddy.",
+      "./scripts/buddy-teleport-out.sh",
+    ],
+  },
+  {
+    file: "docs/superpowers/plans/2026-05-20-buddy-desktop-completion-audit.md",
+    required: [
+      "910f01a test: add automated verification entrypoint",
+      "npm run verify:automated",
+      "docs/superpowers/plans/2026-05-20-buddy-desktop-manual-verification.md",
+    ],
+  },
+  {
+    file: "docs/superpowers/plans/2026-05-20-buddy-desktop-manual-verification.md",
+    required: [
+      "Terminal Buddy Identity",
+      "Popup Actions",
+      "Return To Terminal",
+      "Tray/Menu Bar",
+      "Claude Desktop BLE Pairing",
     ],
   },
 ];
