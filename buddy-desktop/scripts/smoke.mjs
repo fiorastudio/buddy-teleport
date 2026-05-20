@@ -121,6 +121,27 @@ for (const requiredSnippet of [
   }
 }
 
+const mainSource = await readFile(new URL("src/main.tsx", root), "utf8");
+for (const requiredSnippet of [
+  "routeForWindowSearch(window.location.search)",
+  'route === "mascot"',
+  "<App />",
+]) {
+  if (!mainSource.includes(requiredSnippet)) {
+    throw new Error(`main.tsx route wiring missing expected snippet: ${requiredSnippet}`);
+  }
+}
+
+const windowRouteSource = await readFile(new URL("src/utils/windowRoute.mjs", root), "utf8");
+for (const requiredSnippet of [
+  'windowName === "mascot"',
+  'return "status-popup"',
+]) {
+  if (!windowRouteSource.includes(requiredSnippet)) {
+    throw new Error(`windowRoute status-popup route missing expected snippet: ${requiredSnippet}`);
+  }
+}
+
 const statusPopupSource = await readFile(new URL("src/components/StatusPopup.tsx", root), "utf8");
 if (statusPopupSource.includes("MOCK_MASCOT_STATE")) {
   throw new Error("StatusPopup must not export or render a mock Buddy body");

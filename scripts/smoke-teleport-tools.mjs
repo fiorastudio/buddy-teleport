@@ -21,7 +21,7 @@ async function main() {
   await chmod(wrapperPath, 0o755);
 
   await runCargoToolSmoke();
-  console.log("teleport tool smoke passed for Buddy command path");
+  console.log("popup action smoke passed for Buddy Pet, Observe, and Return command paths");
   console.log(process.env.BUDDY_DB_PATH ? `Buddy DB: ${dbPath}` : "Temporary Buddy DB cleaned up");
 }
 
@@ -30,7 +30,7 @@ async function runCargoToolSmoke() {
     "cargo",
     [
       "test",
-      "live_buddy_sidecar_uses_existing_db_and_supports_pet_observe_when_env_is_set",
+      "live_popup_actions_preserve_identity_and_return_when_env_is_set",
       "--",
       "--nocapture",
     ],

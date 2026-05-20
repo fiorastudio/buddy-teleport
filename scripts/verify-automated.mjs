@@ -30,9 +30,9 @@ const checks = [
     args: ["run", "docs:check"],
   },
   {
-    name: "live Buddy tool-path smoke",
+    name: "live Buddy popup-action smoke",
     command: "npm",
-    args: ["run", "smoke:teleport-tools"],
+    args: ["run", "smoke:popup-actions"],
   },
   {
     name: "live teleport runtime smoke",

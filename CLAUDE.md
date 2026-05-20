@@ -105,6 +105,7 @@ npm run verify:automated
 
 For a manual dev launch, run `./scripts/buddy-teleport-out.sh`.
 The Claude slash command artifact `.claude/commands/buddy-teleport.md` invokes the same repo-relative teleport launcher.
+Use `?window=status-popup` to render the same popup path without relying on the native tray click, and `npm run smoke:popup-actions` to exercise the popup Pet, Observe, and Return command contract.
 
 ## Key Protocol Reference: claude-desktop-buddy BLE
 

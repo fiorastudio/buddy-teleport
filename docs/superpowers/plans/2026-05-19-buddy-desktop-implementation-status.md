@@ -18,7 +18,7 @@
 - The ignored local `buddy/` reference checkout has a dirty `package-lock.json` from a prior install/build attempt. Do not commit it; root `.gitignore` excludes `buddy/`.
 - The Rust sidecar path now supports `BUDDY_SIDECAR_PATH` for manual teleport verification with an installed Buddy wrapper.
 - Plain debug `cargo run` falls back to the installed Buddy MCP entry at `$HOME/.buddy/server/dist/server/index.js` when no packaged debug sidecar binary exists; JavaScript MCP entries are launched through `node`.
-- A live Rust smoke test can be run with `BUDDY_TELEPORT_LIVE_SIDECAR=/path/to/wrapper BUDDY_DB_PATH=/tmp/buddy.db cargo test live_buddy_sidecar_uses_existing_db_and_supports_pet_observe_when_env_is_set -- --nocapture`.
+- A live Rust smoke test can be run with `BUDDY_TELEPORT_LIVE_SIDECAR=/path/to/wrapper BUDDY_DB_PATH=/tmp/buddy.db cargo test live_popup_actions_preserve_identity_and_return_when_env_is_set -- --nocapture`.
 - `npm run smoke:teleport-tools` creates an isolated Buddy DB and sidecar wrapper, then runs the live Rust smoke through the same command helpers used by popup Pet/Observe/Return actions.
 - Terminal-to-desktop teleport is represented by `.claude/commands/buddy-teleport.md` and `scripts/buddy-teleport-out.sh`.
 - The slash command now invokes `./scripts/buddy-teleport-out.sh` from the repo instead of a machine-specific absolute checkout path; the launcher defaults to `$HOME/.buddy/server`.
@@ -62,7 +62,7 @@
 - `npm test` from `buddy-desktop`
 - `npm run build` from `buddy-desktop`
 - `cargo test` from `buddy-desktop/src-tauri`
-- `BUDDY_DB_PATH=/private/tmp/buddy-teleport-live/buddy.db BUDDY_TELEPORT_LIVE_SIDECAR=/private/tmp/buddy-teleport-live/buddy-sidecar cargo test live_buddy_sidecar_uses_existing_db_and_supports_pet_observe_when_env_is_set -- --nocapture` from `buddy-desktop/src-tauri`
+- `BUDDY_DB_PATH=/private/tmp/buddy-teleport-live/buddy.db BUDDY_TELEPORT_LIVE_SIDECAR=/private/tmp/buddy-teleport-live/buddy-sidecar cargo test live_popup_actions_preserve_identity_and_return_when_env_is_set -- --nocapture` from `buddy-desktop/src-tauri`
 - `npm run docs:check` from workspace root
 - `node scripts/smoke-installed-buddy.mjs` from `buddy-desktop`
 - `npm run smoke:teleport-runtime` from workspace root seeds an isolated terminal Buddy DB, launches the same teleport wrapper path for a bounded native Tauri run, and fails if runtime polling cannot parse that Buddy's stat card.

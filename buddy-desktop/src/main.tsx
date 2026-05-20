@@ -2,12 +2,13 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { App } from "./App";
 import { BuddyMascot } from "./components/BuddyMascot";
+import { routeForWindowSearch } from "./utils/windowRoute.mjs";
 import "./styles.css";
 
 const root = ReactDOM.createRoot(document.getElementById("root") as HTMLElement);
 
-const params = new URLSearchParams(window.location.search);
-if (params.get("window") === "mascot") {
+const route = routeForWindowSearch(window.location.search);
+if (route === "mascot") {
   root.render(
     <React.StrictMode>
       <BuddyMascot />

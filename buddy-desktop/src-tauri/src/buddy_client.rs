@@ -327,7 +327,7 @@ DISPLAY VERBATIM: Show the full stat card below in a code block. Do not summariz
     }
 
     #[test]
-    fn live_buddy_sidecar_uses_existing_db_and_supports_pet_observe_when_env_is_set() {
+    fn live_popup_actions_preserve_identity_and_return_when_env_is_set() {
         let Ok(sidecar_path) = std::env::var("BUDDY_TELEPORT_LIVE_SIDECAR") else {
             eprintln!("set BUDDY_TELEPORT_LIVE_SIDECAR to run live Buddy teleport smoke");
             return;

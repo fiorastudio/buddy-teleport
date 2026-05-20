@@ -30,6 +30,14 @@ This reports whether the installed Buddy MCP entry exists and whether native GUI
 
 ## Terminal Buddy Identity
 
+Non-tray verification route:
+
+```text
+/?window=status-popup
+```
+
+This renders the same popup app path without using the macOS tray click. Use it to inspect popup identity/body rendering when native tray automation is unavailable. The tray click itself still needs the tray/menu-bar check below.
+
 Pass criteria:
 
 - The floating mascot and tray popup show the same Buddy name, species/rarity, level, XP, stat values, personality text, reaction text, and ASCII body currently shown by terminal `buddy_status`.

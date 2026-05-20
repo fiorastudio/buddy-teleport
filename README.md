@@ -90,6 +90,14 @@ Terminal to desktop:
 
 The same launcher is available as the Claude slash command artifact `.claude/commands/buddy-teleport.md`.
 
+Non-tray popup verification route:
+
+```text
+/?window=status-popup
+```
+
+This route renders the same popup app path used by the tray window. It verifies popup rendering and command wiring without depending on native menu-bar automation; the tray click itself remains a native/manual gate on Ventura.
+
 Desktop back to terminal:
 
 - Use the popup action **Return**.
@@ -105,6 +113,7 @@ For targeted checks:
 
 ```bash
 npm --prefix buddy-desktop test
+npm run smoke:popup-actions
 npm run smoke:teleport-tools
 npm run smoke:teleport-runtime
 ```

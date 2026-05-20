@@ -43,7 +43,8 @@
 | Pet and Observe actions use the real Buddy sidecar path and refresh identity | `buddy_tool` calls `call_buddy_tool_once` with the cached sidecar path; `npm run smoke:teleport-tools` hatches `TeleportAda`, runs `buddy_pet` and `buddy_observe` through the Rust command helper, and verifies identity remains `TeleportAda` / `ROBOT`. | Proven by live smoke |
 | Observe path preserves guard-mode defaults and workspace cwd | `normalize_buddy_tool_args` adds `claims`, `edges`, and `cwd`; `scripts/buddy-teleport-out.sh` exports `BUDDY_WORKSPACE_CWD`. | Proven by Rust tests |
 | Desktop Return action teleports Buddy back to terminal state | `buddy_teleport_back` uses `teleport_back_once`, records `buddy_observe`, marks state offline, emits `buddy-teleported-back`, and disables polling. Live smoke verifies identity remains `TeleportAda` / `ROBOT` and payload mood is `sleeping`. | Proven by Rust tests and live smoke |
-| Tray click targets the popup window rather than the mascot surface | Tray constants target `status-popup`; `tauri.conf.json` defines `status-popup` hidden by default; mascot window uses a distinct `mascot` label and `window=mascot&companion=buddy` route. | Proven by Rust and frontend smoke tests |
+| Popup behavior is verifiable without native tray automation | `/?window=status-popup` routes to the same `App`/`StatusPopup` path used by the tray popup; `scripts/smoke.mjs` guards the route, popup action wiring, and absence of mock Buddy bodies. | Proven by frontend smoke tests |
+| Tray click targets the popup window rather than the mascot surface | Tray constants target `status-popup`; `tauri.conf.json` defines `status-popup` hidden by default; mascot window uses a distinct `mascot` label and `window=mascot&companion=buddy` route. | Proven by Rust and frontend smoke tests; native click remains manual |
 | BLE permission response frames are normalized consistently across frontend and Tauri | React `buildPermissionDecision` and Rust `build_permission_response` trim prompt ids, reject blank ids, and only allow `once`/`deny`. | Proven by frontend and Rust tests |
 | Work is checked into repository | Completed implementation and verification work is committed and pushed to `origin/main`; audit-only sync commits may follow without changing the implementation evidence. | Proven by `git status --short --branch` and push results |
 
@@ -55,6 +56,7 @@
 - `npm run typecheck` from `buddy-desktop`
 - `cargo test` from `buddy-desktop/src-tauri`
 - `npm run docs:check` from workspace root
+- `npm run smoke:popup-actions` from workspace root
 - `npm run smoke:teleport-tools` from workspace root
 - `npm run smoke:teleport-runtime` from workspace root
 - `git diff --check` from workspace root
