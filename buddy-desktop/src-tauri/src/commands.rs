@@ -46,20 +46,7 @@ pub fn buddy_teleport_back(
         .clone()
         .ok_or("Buddy sidecar path is not ready yet")?;
 
-    let (_result, mut refreshed_state) = call_buddy_tool_once(
-        &binary_path,
-        "buddy_observe",
-        normalize_buddy_tool_args(
-            "buddy_observe",
-            serde_json::json!({
-                "summary": "Buddy teleported back from the desktop app to the terminal.",
-                "claims": [],
-                "edges": []
-            }),
-        ),
-    )?;
-
-    refreshed_state.online = false;
+    let refreshed_state = teleport_back_once(&binary_path)?;
     let payload = frontend_buddy_payload(&refreshed_state);
     {
         let mut poll_state = state.0.lock().unwrap();
@@ -79,6 +66,24 @@ pub fn buddy_teleport_back(
     );
 
     Ok(payload)
+}
+
+pub fn teleport_back_once(binary_path: &str) -> Result<crate::mascot_state::BuddyMcpState, String> {
+    let (_result, mut refreshed_state) = call_buddy_tool_once(
+        binary_path,
+        "buddy_observe",
+        normalize_buddy_tool_args(
+            "buddy_observe",
+            serde_json::json!({
+                "summary": "Buddy teleported back from the desktop app to the terminal.",
+                "claims": [],
+                "edges": []
+            }),
+        ),
+    )?;
+
+    refreshed_state.online = false;
+    Ok(refreshed_state)
 }
 
 /// Get the current cached buddy state synchronously.

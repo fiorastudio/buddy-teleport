@@ -378,5 +378,15 @@ DISPLAY VERBATIM: Show the full stat card below in a code block. Do not summariz
         assert_eq!(after_tools.name, "TeleportAda");
         assert_eq!(after_tools.species, "ROBOT");
         assert!(after_tools.xp >= status.xp);
+
+        let returned = crate::commands::teleport_back_once(&sidecar_path).unwrap();
+        assert_eq!(returned.name, "TeleportAda");
+        assert_eq!(returned.species, "ROBOT");
+        assert!(!returned.online);
+
+        let payload = crate::mascot_state::frontend_buddy_payload(&returned);
+        assert_eq!(payload["name"], "TeleportAda");
+        assert_eq!(payload["species"], "ROBOT");
+        assert_eq!(payload["mood"], "sleeping");
     }
 }

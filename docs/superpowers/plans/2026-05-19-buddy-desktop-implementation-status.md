@@ -19,7 +19,7 @@
 - The Rust sidecar path now supports `BUDDY_SIDECAR_PATH` for manual teleport verification with an installed Buddy wrapper.
 - Plain debug `cargo run` falls back to the installed Buddy MCP entry at `$HOME/.buddy/server/dist/server/index.js` when no packaged debug sidecar binary exists; JavaScript MCP entries are launched through `node`.
 - A live Rust smoke test can be run with `BUDDY_TELEPORT_LIVE_SIDECAR=/path/to/wrapper BUDDY_DB_PATH=/tmp/buddy.db cargo test live_buddy_sidecar_uses_existing_db_and_supports_pet_observe_when_env_is_set -- --nocapture`.
-- `npm run smoke:teleport-tools` creates an isolated Buddy DB and sidecar wrapper, then runs the live Rust smoke through the same `call_buddy_tool_once` command helper used by popup Pet/Observe actions.
+- `npm run smoke:teleport-tools` creates an isolated Buddy DB and sidecar wrapper, then runs the live Rust smoke through the same command helpers used by popup Pet/Observe/Return actions.
 - Terminal-to-desktop teleport is represented by `.claude/commands/buddy-teleport.md` and `scripts/buddy-teleport-out.sh`.
 - Desktop-to-terminal teleport is represented by the `buddy_teleport_back` Tauri command and popup **Return** action. It records a `buddy_observe` event, marks Buddy offline in desktop state, and disables polling until the app is restarted/teleported out again.
 - Popup Buddy actions now expose `buddy_pet` and `buddy_observe` through the same safe Tauri command allowlist, then refresh the cached terminal Buddy state. Desktop-originated `buddy_observe` calls preserve caller-provided `cwd` and otherwise default to `BUDDY_WORKSPACE_CWD`/process cwd; the teleport-out script exports `BUDDY_WORKSPACE_CWD` as the terminal workspace root.
@@ -62,7 +62,7 @@
 - `npm run docs:check` from workspace root
 - `node scripts/smoke-installed-buddy.mjs` from `buddy-desktop`
 - `npm run smoke:teleport-runtime` from workspace root seeds an isolated terminal Buddy DB, launches the same teleport wrapper path for a bounded native Tauri run, and fails if runtime polling cannot parse that Buddy's stat card.
-- `npm run smoke:teleport-tools` from workspace root hatches `TeleportAda`, runs `buddy_pet` and `buddy_observe` through the Rust command helper, refreshes status, and verifies the same terminal Buddy identity remains present.
+- `npm run smoke:teleport-tools` from workspace root hatches `TeleportAda`, runs `buddy_pet`, `buddy_observe`, and teleport-back through Rust command helpers, refreshes status, and verifies the same terminal Buddy identity remains present with an offline return payload.
 - `cargo run` from `buddy-desktop/src-tauri` starts `target/debug/buddy-desktop` and spawns `node /Users/Sandbox_Jwu/.buddy/server/dist/server/index.js` without the earlier `failed to spawn buddy: No such file or directory` retry loop.
 - `BUDDY_DB_PATH=/private/tmp/buddy-teleport-gui/buddy.db ./scripts/buddy-teleport-out.sh` launched the Vite dev server and native Tauri app after seeding the temp DB with `TeleportAda`; startup reached `target/debug/buddy-desktop` with no Buddy parser errors, and `curl http://127.0.0.1:1420/` returned the React entry HTML with host permissions.
 
