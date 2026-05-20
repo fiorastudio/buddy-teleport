@@ -354,22 +354,27 @@ DISPLAY VERBATIM: Show the full stat card below in a code block. Do not summariz
         assert_eq!(status.species, "ROBOT");
         assert!(status.online);
 
-        let pet = client.call_tool("buddy_pet", json!({})).unwrap();
-        assert!(pet.get("error").is_none(), "{pet}");
+        drop(client);
 
-        let observe = client
-            .call_tool(
+        let (pet, after_pet) =
+            crate::commands::call_buddy_tool_once(&sidecar_path, "buddy_pet", json!({})).unwrap();
+        assert!(pet.get("error").is_none(), "{pet}");
+        assert_eq!(after_pet.name, "TeleportAda");
+        assert_eq!(after_pet.species, "ROBOT");
+
+        let (observe, after_tools) = crate::commands::call_buddy_tool_once(
+            &sidecar_path,
+            "buddy_observe",
+            crate::commands::normalize_buddy_tool_args(
                 "buddy_observe",
                 json!({
-                    "summary": "verified teleport smoke from Rust sidecar",
-                    "claims": [],
-                    "edges": []
+                    "summary": "verified teleport smoke from Rust command path"
                 }),
-            )
-            .unwrap();
+            ),
+        )
+        .unwrap();
         assert!(observe.get("error").is_none(), "{observe}");
 
-        let after_tools = client.get_status().unwrap();
         assert_eq!(after_tools.name, "TeleportAda");
         assert_eq!(after_tools.species, "ROBOT");
         assert!(after_tools.xp >= status.xp);
